@@ -14,7 +14,7 @@ if you want) and linkable to any machine you use.
 
 ```
 skate set gh_token GITHUB_TOKEN
-echo "export GITHUB_TOKEN=$(skate get gh_token)" >> ~/.bashrc
+echo 'export GITHUB_TOKEN=$(skate get gh_token)' >> ~/.bashrc
 ```
 
 ### Save some passwords
