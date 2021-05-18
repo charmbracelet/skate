@@ -12,21 +12,21 @@ if you want) and linkable to any machine you use.
 
 ### Keep secrets out of your .bashrc
 
-```
+```bash
 skate set gh_token GITHUB_TOKEN
 echo 'export GITHUB_TOKEN=$(skate get gh_token)' >> ~/.bashrc
 ```
 
 ### Save some passwords
 
-```
+```bash
 skate set github@password.db PASSWORD
 skate get github@password.db
 ```
 
 ### Easily store data in scripts
 
-```
+```bash
 #!/bin/bash
 
 skate set saved_stuff $1
@@ -37,7 +37,7 @@ echo "We just saved $(skate get saved_stuff)"
 
 Use your fave package manager:
 
-```
+```bash
 ```
 
 # Self-hosting
@@ -54,4 +54,4 @@ of your Charm Cloud server.
 
 <a href="https://charm.sh/"><img alt="The Charm logo" src="https://stuff.charm.sh/charm-badge-unrounded.jpg" width="400"></a>
 
-Charm热爱开源! / Charm loves open source!
+Charm热爱开源 • Charm loves open source
