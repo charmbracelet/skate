@@ -7,7 +7,6 @@ import (
 
 	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/kv"
-	"github.com/charmbracelet/charm/ui/common"
 	"github.com/spf13/cobra"
 )
 
@@ -18,64 +17,63 @@ var (
 	rootCmd = &cobra.Command{
 		Use:    "",
 		Hidden: false,
-		Short:  "Use the Charm key value store.",
-		Long:   common.FormatLong(fmt.Sprintf("Commands to set, get and delete data from your Charm Cloud backed key value store.")),
+		Short:  "Skate, a personal key value store.",
 		Args:   cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return nil
 		},
 	}
 
-	SetCmd = &cobra.Command{
+	setCmd = &cobra.Command{
 		Use:    "set KEY[@DB] VALUE",
 		Hidden: false,
 		Short:  "Set a value for a key with an optional @ db.",
 		Args:   cobra.MaximumNArgs(2),
-		RunE:   Set,
+		RunE:   set,
 	}
 
-	GetCmd = &cobra.Command{
+	getCmd = &cobra.Command{
 		Use:    "get KEY[@DB]",
 		Hidden: false,
 		Short:  "Get a value for a key with an optional @ db.",
 		Args:   cobra.ExactArgs(1),
-		RunE:   Get,
+		RunE:   get,
 	}
 
-	DeleteCmd = &cobra.Command{
+	deleteCmd = &cobra.Command{
 		Use:    "delete KEY[@DB]",
 		Hidden: false,
 		Short:  "Delete a key with an optional @ db.",
 		Args:   cobra.ExactArgs(1),
-		RunE:   Delete,
+		RunE:   delete,
 	}
 
-	KeysCmd = &cobra.Command{
+	keysCmd = &cobra.Command{
 		Use:    "keys [@DB]",
 		Hidden: false,
 		Short:  "List all keys with an optional @ db.",
 		Args:   cobra.MaximumNArgs(1),
-		RunE:   Keys,
+		RunE:   keys,
 	}
 
-	SyncCmd = &cobra.Command{
+	syncCmd = &cobra.Command{
 		Use:    "sync [@DB]",
 		Hidden: false,
 		Short:  "Sync local db with latest Charm Cloud db.",
 		Args:   cobra.MaximumNArgs(1),
-		RunE:   Sync,
+		RunE:   sync,
 	}
 
-	ResetCmd = &cobra.Command{
+	resetCmd = &cobra.Command{
 		Use:    "reset [@DB]",
 		Hidden: false,
 		Short:  "Delete local db and pull down fresh copy from Charm Cloud.",
 		Args:   cobra.MaximumNArgs(1),
-		RunE:   Reset,
+		RunE:   reset,
 	}
 )
 
-func Set(cmd *cobra.Command, args []string) error {
+func set(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -90,7 +88,7 @@ func Set(cmd *cobra.Command, args []string) error {
 	return db.SetReader(k, os.Stdin)
 }
 
-func Get(cmd *cobra.Command, args []string) error {
+func get(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -107,7 +105,7 @@ func Get(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func Delete(cmd *cobra.Command, args []string) error {
+func delete(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -119,7 +117,7 @@ func Delete(cmd *cobra.Command, args []string) error {
 	return db.Delete(k)
 }
 
-func Keys(cmd *cobra.Command, args []string) error {
+func keys(cmd *cobra.Command, args []string) error {
 	var k string
 	if len(args) == 1 {
 		k = args[0]
@@ -143,7 +141,7 @@ func Keys(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func Sync(cmd *cobra.Command, args []string) error {
+func sync(cmd *cobra.Command, args []string) error {
 	n, err := nameFromArgs(args)
 	if err != nil {
 		return err
@@ -155,7 +153,7 @@ func Sync(cmd *cobra.Command, args []string) error {
 	return db.Sync()
 }
 
-func Reset(cmd *cobra.Command, args []string) error {
+func reset(cmd *cobra.Command, args []string) error {
 	n, err := nameFromArgs(args)
 	if err != nil {
 		return err
@@ -213,12 +211,12 @@ func init() {
 		Version = "unknown (built from source)"
 	}
 	rootCmd.Version = Version
-	rootCmd.AddCommand(GetCmd)
-	rootCmd.AddCommand(SetCmd)
-	rootCmd.AddCommand(DeleteCmd)
-	rootCmd.AddCommand(KeysCmd)
-	rootCmd.AddCommand(SyncCmd)
-	rootCmd.AddCommand(ResetCmd)
+	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(keysCmd)
+	rootCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(resetCmd)
 }
 
 func main() {
