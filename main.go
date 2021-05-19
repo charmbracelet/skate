@@ -7,12 +7,18 @@ import (
 
 	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/kv"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/spf13/cobra"
 )
 
 var (
 	Version   = ""
 	CommitSHA = ""
+
+	reverseIterate   bool
+	keysIterate      bool
+	valuesIterate    bool
+	delimiterIterate string
 
 	rootCmd = &cobra.Command{
 		Use:    "",
@@ -48,12 +54,12 @@ var (
 		RunE:   delete,
 	}
 
-	keysCmd = &cobra.Command{
-		Use:    "keys [@DB]",
+	iterateCmd = &cobra.Command{
+		Use:    "iterate [@DB]",
 		Hidden: false,
-		Short:  "List all keys with an optional @ db.",
+		Short:  "Iterate over all key value pairs with an optional @ db.",
 		Args:   cobra.MaximumNArgs(1),
-		RunE:   keys,
+		RunE:   iterate,
 	}
 
 	syncCmd = &cobra.Command{
@@ -117,8 +123,14 @@ func delete(cmd *cobra.Command, args []string) error {
 	return db.Delete(k)
 }
 
-func keys(cmd *cobra.Command, args []string) error {
+func iterate(cmd *cobra.Command, args []string) error {
 	var k string
+	var pf string
+	if keysIterate || valuesIterate {
+		pf = "%s\n"
+	} else {
+		pf = fmt.Sprintf("%%s%s%%s\n", delimiterIterate)
+	}
 	if len(args) == 1 {
 		k = args[0]
 	}
@@ -131,14 +143,36 @@ func keys(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	db.Sync()
-	ks, err := db.Keys()
-	if err != nil {
-		panic(err)
-	}
-	for _, k := range ks {
-		fmt.Println(string(k))
-	}
-	return nil
+	return db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		opts.Reverse = reverseIterate
+		if keysIterate {
+			opts.PrefetchValues = false
+		}
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			if keysIterate {
+				fmt.Printf(pf, k)
+				continue
+			}
+			err := item.Value(func(v []byte) error {
+				if valuesIterate {
+					fmt.Printf(pf, v)
+				} else {
+					fmt.Printf(pf, k, v)
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func sync(cmd *cobra.Command, args []string) error {
@@ -211,10 +245,16 @@ func init() {
 		Version = "unknown (built from source)"
 	}
 	rootCmd.Version = Version
+
+	iterateCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "iterate in reverse lexicographic order")
+	iterateCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
+	iterateCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
+	iterateCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
+
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(deleteCmd)
-	rootCmd.AddCommand(keysCmd)
+	rootCmd.AddCommand(iterateCmd)
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(resetCmd)
 }
