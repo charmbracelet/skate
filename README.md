@@ -12,32 +12,35 @@ if you want) and linkable to any machine you use.
 
 ### Keep secrets out of your .bashrc
 
-```bash
+```
 skate set gh_token GITHUB_TOKEN
 echo 'export GITHUB_TOKEN=$(skate get gh_token)' >> ~/.bashrc
 ```
 
 ### Save some passwords
 
-```bash
+```
 skate set github@password.db PASSWORD
 skate get github@password.db
 ```
 
 ### Easily store data in scripts
 
-```bash
+```
 #!/bin/bash
 
-skate set saved_stuff $1
-echo "We just saved $(skate get saved_stuff)"
+./skate set "$(date)@bookmarks.db" $1
+
+./skate keys @bookmarks.db | while read b; do
+  echo "$b $(./skate get "$b@bookmarks.db")"
+done
 ```
 
 # Installation
 
 Use your fave package manager:
 
-```bash
+```
 ```
 
 # Self-hosting
@@ -47,6 +50,12 @@ cloud, but if you want to self-host you can download
 [charm](https://github.com/charmbracelet/charm) and run you own cloud with
 `charm serve`. Then set the `CHARM_HOST` environment variable to the hostname
 of your Charm Cloud server.
+
+# Developers
+
+Skate is built on [charm/kv](https://github.com/charmbracelet/charm/kv). If
+you'd like to build a tool that includes a user key value store, be sure to
+check it out.
 
 # License
 
