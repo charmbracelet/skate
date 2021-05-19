@@ -29,10 +29,10 @@ skate get github@password.db
 ```
 #!/bin/bash
 
-./skate set "$(date)@bookmarks.db" $1
+skate set "$(date)@bookmarks.db" $1
 
-./skate keys @bookmarks.db | while read b; do
-  echo "$b $(./skate get "$b@bookmarks.db")"
+skate keys @bookmarks.db | while read b; do
+  echo "$b $(skate get "$b@bookmarks.db")"
 done
 ```
 
