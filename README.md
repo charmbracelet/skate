@@ -30,7 +30,7 @@ skate get github@password.db
 #!/bin/bash
 
 skate set "$(date)@bookmarks.db" $1
-skate iterate @bookmarks.db
+skate list @bookmarks.db
 ```
 
 # Installation

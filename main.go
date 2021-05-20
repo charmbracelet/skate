@@ -54,12 +54,12 @@ var (
 		RunE:   delete,
 	}
 
-	iterateCmd = &cobra.Command{
-		Use:    "iterate [@DB]",
+	listCmd = &cobra.Command{
+		Use:    "list [@DB]",
 		Hidden: false,
-		Short:  "Iterate over all key value pairs with an optional @ db.",
+		Short:  "List key value pairs with an optional @ db.",
 		Args:   cobra.MaximumNArgs(1),
-		RunE:   iterate,
+		RunE:   list,
 	}
 
 	syncCmd = &cobra.Command{
@@ -123,7 +123,7 @@ func delete(cmd *cobra.Command, args []string) error {
 	return db.Delete(k)
 }
 
-func iterate(cmd *cobra.Command, args []string) error {
+func list(cmd *cobra.Command, args []string) error {
 	var k string
 	var pf string
 	if keysIterate || valuesIterate {
@@ -246,15 +246,15 @@ func init() {
 	}
 	rootCmd.Version = Version
 
-	iterateCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "iterate in reverse lexicographic order")
-	iterateCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
-	iterateCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
-	iterateCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
+	listCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "list in reverse lexicographic order")
+	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
+	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
+	listCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
 
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(deleteCmd)
-	rootCmd.AddCommand(iterateCmd)
+	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(resetCmd)
 }
