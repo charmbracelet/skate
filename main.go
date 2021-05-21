@@ -231,9 +231,9 @@ func openKV(name string) (*kv.KV, error) {
 		return nil, err
 	}
 	if name == "" {
-		name = "charm.sh..user.default"
+		name = "charm.sh.skate.default"
 	}
-	return kv.OpenWithDefaults(name, fmt.Sprintf("%s/", dd))
+	return kv.OpenWithDefaults(name, fmt.Sprintf("%s/kv/", dd))
 }
 
 func init() {
