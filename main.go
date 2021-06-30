@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/charm/client"
+	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/dgraph-io/badger/v3"
 	"github.com/spf13/cobra"
@@ -257,6 +258,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(resetCmd)
+	rootCmd.AddCommand(cmd.LinkCmd("skate"))
 }
 
 func main() {
