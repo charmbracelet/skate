@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/dgraph-io/badger/v3"
@@ -227,14 +226,10 @@ func keyParser(k string) ([]byte, string, error) {
 }
 
 func openKV(name string) (*kv.KV, error) {
-	dd, err := client.DataPath()
-	if err != nil {
-		return nil, err
-	}
 	if name == "" {
 		name = "charm.sh.skate.default"
 	}
-	return kv.OpenWithDefaults(name, fmt.Sprintf("%s/kv/", dd))
+	return kv.OpenWithDefaults(name)
 }
 
 func init() {
