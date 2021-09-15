@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/dgraph-io/badger/v3"
+	"github.com/muesli/reflow/truncate"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +17,7 @@ var (
 	Version   = ""
 	CommitSHA = ""
 
+	truncateAt       uint = 1024
 	reverseIterate   bool
 	keysIterate      bool
 	valuesIterate    bool
@@ -162,10 +165,20 @@ func list(cmd *cobra.Command, args []string) error {
 				continue
 			}
 			err := item.Value(func(v []byte) error {
-				if valuesIterate {
-					fmt.Printf(pf, v)
+				var vout string
+				if utf8.Valid(v) {
+					vout = string(v)
 				} else {
-					fmt.Printf(pf, k, v)
+					vout = "(omitted binary data)"
+				}
+				tv := truncate.String(vout, truncateAt)
+				if len(vout) > int(truncateAt) {
+					tv += " (truncated string)"
+				}
+				if valuesIterate {
+					fmt.Printf(pf, tv)
+				} else {
+					fmt.Printf(pf, k, tv)
 				}
 				return nil
 			})
