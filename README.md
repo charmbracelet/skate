@@ -98,19 +98,23 @@ machines.
 
 ### Syncing
 
-When you run `skate set`, data is encrypted and synced to the network.
-When you `get`, however, data is loaded from the local cache to ensure it loads
-ultra-fast. To fetch any new data from the server just run `skate sync`.
+When you run `skate set`, data is encrypted and synced to the network. When
+you `get`, however, data is loaded from the local cache. To fetch any new data
+from the server just run `skate sync`.
 
 ## Examples
 
 Here are some of our favorite ways to use `skate`.
 
-### Keep secrets out of your .bashrc
+### Keep secrets out of your scripts
 
 ```bash
 skate set gh_token GITHUB_TOKEN
-echo 'export GITHUB_TOKEN=$(skate get gh_token)' >> ~/.bashrc
+
+#!/bin/bash
+curl -su "$1:$GITHUB_TOKEN" \
+    https://api.github.com/users/$1 \
+    | jq -r '"\(.login) has \(.total_private_repos) private repos"'
 ```
 
 ### Keep passwords in their own database
@@ -120,7 +124,7 @@ skate set github@password.db PASSWORD
 skate get github@password.db
 ```
 
-### Manage data with scripts
+### Use scripts to manage data
 
 ```bash
 #!/bin/bash
