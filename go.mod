@@ -5,7 +5,7 @@ go 1.17
 replace github.com/charmbracelet/charm => ../charm
 
 require (
-	github.com/charmbracelet/charm v0.8.6
+	github.com/charmbracelet/charm v0.0.0-00010101000000-000000000000
 	github.com/dgraph-io/badger/v3 v3.2011.1
 	github.com/spf13/cobra v1.0.0
 )
@@ -56,7 +56,7 @@ require (
 	goji.io v2.0.2+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
+	golang.org/x/net v0.0.0-20210326060303-6b1517762897 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/term v0.0.0-20210422114643-f5beecf764ed // indirect
 	golang.org/x/tools v0.0.0-20201124115921-2c860bdd6e78 // indirect
