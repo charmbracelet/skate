@@ -17,9 +17,9 @@ require (
 	github.com/calmh/randomart v1.1.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/charmbracelet/bubbles v0.8.0 // indirect
-	github.com/charmbracelet/bubbletea v0.15.0 // indirect
+	github.com/charmbracelet/bubbletea v0.19.0 // indirect
 	github.com/charmbracelet/keygen v0.1.2 // indirect
-	github.com/charmbracelet/lipgloss v0.3.0 // indirect
+	github.com/charmbracelet/lipgloss v0.4.0 // indirect
 	github.com/charmbracelet/wish v0.0.0-00010101000000-000000000000 // indirect
 	github.com/containerd/console v1.0.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.4-0.20210122082011-bb5d392ed82d // indirect
@@ -42,6 +42,7 @@ require (
 	github.com/meowgorithm/babylogger v1.2.0 // indirect
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/go-app-paths v0.2.1 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/sasquatch v0.0.0-20200811221207-66979d92330a // indirect
