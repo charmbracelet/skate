@@ -112,7 +112,7 @@ Here are some of our favorite ways to use `skate`.
 skate set gh_token GITHUB_TOKEN
 
 #!/bin/bash
-curl -su "$1:$GITHUB_TOKEN" \
+curl -su "$1:$(skate get gh_token)" \
     https://api.github.com/users/$1 \
     | jq -r '"\(.login) has \(.total_private_repos) private repos"'
 ```
