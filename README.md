@@ -1,5 +1,11 @@
 # Skate
 
+<p>
+    <img src="https://stuff.charm.sh/skate/skate-header.png?2" width="480" alt="A nice rendering of a roller skate with the words ‘Charm Skate’ next to it"><br>
+    <a href="https://github.com/charmbracelet/skate/releases"><img src="https://img.shields.io/github/release/charmbracelet/skate.svg" alt="Latest Release"></a>
+    <a href="https://github.com/charmbracelet/skate/actions"><img src="https://github.com/charmbracelet/skate/workflows/build/badge.svg" alt="Build Status"></a>
+</p>
+
 A personal key-value store. 🛼
 
 Skate is simple and powerful. Use it to save and retrieve anything you’d
@@ -149,7 +155,7 @@ you’d like to build a tool that includes a user key value store, check it out.
 
 ## License
 
-[MIT](https://github.com/charmbracelet/skate/raw/master/LICENSE)
+[MIT](https://github.com/charmbracelet/skate/raw/main/LICENSE)
 
 ***
 
