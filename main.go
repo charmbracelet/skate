@@ -26,7 +26,7 @@ var (
 		Short:  "Skate, a personal key value store.",
 		Args:   cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return cmd.Help()
 		},
 	}
 
