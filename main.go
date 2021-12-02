@@ -39,11 +39,13 @@ var (
 	}
 
 	getCmd = &cobra.Command{
-		Use:    "get KEY[@DB]",
-		Hidden: false,
-		Short:  "Get a value for a key with an optional @ db.",
-		Args:   cobra.ExactArgs(1),
-		RunE:   get,
+		Use:           "get KEY[@DB]",
+		Hidden:        false,
+		Short:         "Get a value for a key with an optional @ db.",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Args:          cobra.ExactArgs(1),
+		RunE:          get,
 	}
 
 	deleteCmd = &cobra.Command{
