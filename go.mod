@@ -2,11 +2,10 @@ module skate
 
 go 1.17
 
-replace github.com/charmbracelet/charm => ../charm
-
 require (
-	github.com/charmbracelet/charm v0.0.0-00010101000000-000000000000
+	github.com/charmbracelet/charm v0.9.0
 	github.com/dgraph-io/badger/v3 v3.2011.1
+	github.com/muesli/reflow v0.3.0
 	github.com/spf13/cobra v1.0.0
 )
 
@@ -20,7 +19,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.19.0 // indirect
 	github.com/charmbracelet/keygen v0.1.2 // indirect
 	github.com/charmbracelet/lipgloss v0.4.0 // indirect
-	github.com/charmbracelet/wish v0.0.0-00010101000000-000000000000 // indirect
+	github.com/charmbracelet/wish v0.1.1 // indirect
 	github.com/containerd/console v1.0.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.4-0.20210122082011-bb5d392ed82d // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
@@ -44,7 +43,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/go-app-paths v0.2.1 // indirect
-	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/sasquatch v0.0.0-20200811221207-66979d92330a // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/muesli/toktok v0.0.0-20201007181047-c74187025f3f // indirect
@@ -74,5 +72,3 @@ require (
 	modernc.org/strutil v1.1.0 // indirect
 	modernc.org/token v1.0.0 // indirect
 )
-
-replace github.com/charmbracelet/wish => ../wish
