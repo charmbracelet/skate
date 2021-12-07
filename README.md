@@ -58,7 +58,7 @@ nix-env -iA nixpkgs.skate
 Or download it:
 
 * [Packages][releases] are available in Debian and RPM formats
-* [Binaries][releases] are available for Linux, FreeBSD, OpenBSD, macOS, and Windows
+* [Binaries][releases] are available for Linux, macOS, and Windows
 
 Or just build and install it yourself. Go 1.16 or higher is required.
 
