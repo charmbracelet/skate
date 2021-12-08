@@ -150,7 +150,7 @@ local network. For details, see the [Charm docs][selfhost].
 
 ## Hey, Developers
 
-Skate is built on [charm/kv](https://github.com/charmbracelet/charm/kv). If
+Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
 you’d like to build a tool that includes a user key value store, check it out.
 
 ## License
