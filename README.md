@@ -68,7 +68,7 @@ cd skate
 go install
 ```
 
-[releases]: https://github.com/charm/skate/releases
+[releases]: https://github.com/charmbracelet/skate/releases
 
 ## Other Features
 
