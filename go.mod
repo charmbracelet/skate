@@ -1,4 +1,4 @@
-module skate
+module github.com/charmbracelet/skate
 
 go 1.17
 
