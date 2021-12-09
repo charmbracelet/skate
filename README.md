@@ -60,12 +60,10 @@ Or download it:
 * [Packages][releases] are available in Debian and RPM formats
 * [Binaries][releases] are available for Linux, macOS, and Windows
 
-Or just build and install it yourself. Go 1.16 or higher is required.
+Or just install it with `go`:
 
 ```bash
-git clone https://github.com/charmbracelet/skate.git
-cd skate
-go install
+go install github.com/charmbracelet/skate@latest
 ```
 
 [releases]: https://github.com/charmbracelet/skate/releases
