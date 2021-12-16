@@ -3,7 +3,7 @@ module github.com/charmbracelet/skate
 go 1.17
 
 require (
-	github.com/charmbracelet/charm v0.9.1
+	github.com/charmbracelet/charm v0.9.2
 	github.com/dgraph-io/badger/v3 v3.2011.1
 	github.com/muesli/reflow v0.3.0
 	github.com/spf13/cobra v1.0.0
@@ -16,7 +16,7 @@ require (
 	github.com/calmh/randomart v1.1.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/charmbracelet/bubbles v0.8.0 // indirect
-	github.com/charmbracelet/bubbletea v0.19.0 // indirect
+	github.com/charmbracelet/bubbletea v0.19.1 // indirect
 	github.com/charmbracelet/keygen v0.1.2 // indirect
 	github.com/charmbracelet/lipgloss v0.4.0 // indirect
 	github.com/charmbracelet/wish v0.1.1 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/flatbuffers v1.12.0 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jacobsa/crypto v0.0.0-20190317225127-9f44e2d11115 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
@@ -56,19 +56,20 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.3.0 // indirect
 	golang.org/x/net v0.0.0-20210326060303-6b1517762897 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	golang.org/x/term v0.0.0-20210422114643-f5beecf764ed // indirect
 	golang.org/x/tools v0.0.0-20201124115921-2c860bdd6e78 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	modernc.org/cc/v3 v3.33.5 // indirect
-	modernc.org/ccgo/v3 v3.9.4 // indirect
-	modernc.org/libc v1.9.5 // indirect
-	modernc.org/mathutil v1.2.2 // indirect
-	modernc.org/memory v1.0.4 // indirect
+	lukechampine.com/uint128 v1.1.1 // indirect
+	modernc.org/cc/v3 v3.35.18 // indirect
+	modernc.org/ccgo/v3 v3.12.82 // indirect
+	modernc.org/libc v1.11.87 // indirect
+	modernc.org/mathutil v1.4.1 // indirect
+	modernc.org/memory v1.0.5 // indirect
 	modernc.org/opt v0.1.1 // indirect
-	modernc.org/sqlite v1.10.8 // indirect
-	modernc.org/strutil v1.1.0 // indirect
+	modernc.org/sqlite v1.14.2 // indirect
+	modernc.org/strutil v1.1.1 // indirect
 	modernc.org/token v1.0.0 // indirect
 )
