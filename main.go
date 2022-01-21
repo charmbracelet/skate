@@ -112,7 +112,7 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(v))
+	fmt.Print(string(v))
 	return nil
 }
 
