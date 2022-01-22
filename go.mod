@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/charmbracelet/charm v0.9.2
 	github.com/dgraph-io/badger/v3 v3.2011.1
-	github.com/muesli/reflow v0.3.0
 	github.com/spf13/cobra v1.0.0
 )
 
@@ -43,6 +42,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/go-app-paths v0.2.1 // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/sasquatch v0.0.0-20200811221207-66979d92330a // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/muesli/toktok v0.0.0-20201007181047-c74187025f3f // indirect

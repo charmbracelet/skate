@@ -8,8 +8,8 @@ import (
 
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
+	"github.com/charmbracelet/charm/ui/common"
 	"github.com/dgraph-io/badger/v3"
-	"github.com/muesli/reflow/truncate"
 	"github.com/spf13/cobra"
 )
 
@@ -17,10 +17,10 @@ var (
 	Version   = ""
 	CommitSHA = ""
 
-	truncateAt       uint = 1024
 	reverseIterate   bool
 	keysIterate      bool
 	valuesIterate    bool
+	showBinary       bool
 	delimiterIterate string
 
 	rootCmd = &cobra.Command{
@@ -112,7 +112,7 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(string(v))
+	printFromKV("%s", v)
 	return nil
 }
 
@@ -161,24 +161,14 @@ func list(cmd *cobra.Command, args []string) error {
 			item := it.Item()
 			k := item.Key()
 			if keysIterate {
-				fmt.Printf(pf, k)
+				printFromKV(pf, k)
 				continue
 			}
 			err := item.Value(func(v []byte) error {
-				var vout string
-				if utf8.Valid(v) {
-					vout = string(v)
-				} else {
-					vout = "(omitted binary data)"
-				}
-				tv := truncate.String(vout, truncateAt)
-				if len(vout) > int(truncateAt) {
-					tv += " (truncated string)"
-				}
 				if valuesIterate {
-					fmt.Printf(pf, tv)
+					printFromKV(pf, v)
 				} else {
-					fmt.Printf(pf, k, tv)
+					printFromKV(pf, k, v)
 				}
 				return nil
 			})
@@ -225,6 +215,22 @@ func nameFromArgs(args []string) (string, error) {
 	return n, nil
 }
 
+func printFromKV(pf string, vs ...[]byte) {
+	nb := "(omitted binary data)"
+	fvs := make([]interface{}, 0)
+	for _, v := range vs {
+		if common.IsTTY() && !showBinary && !utf8.Valid(v) {
+			fvs = append(fvs, nb)
+		} else {
+			fvs = append(fvs, string(v))
+		}
+	}
+	fmt.Printf(pf, fvs...)
+	if common.IsTTY() && !strings.HasSuffix(pf, "\n") {
+		fmt.Println()
+	}
+}
+
 func keyParser(k string) ([]byte, string, error) {
 	var key, db string
 	ps := strings.Split(k, "@")
@@ -261,6 +267,8 @@ func init() {
 	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
 	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
 	listCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
+	listCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
+	getCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
