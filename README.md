@@ -151,12 +151,22 @@ local network. For details, see the [Charm docs][selfhost].
 Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
 you’d like to build a tool that includes a user key value store, check it out.
 
+## Feedback
+
+We’d love to hear your thoughts on this project. Feel free to drop us a note!
+
+* [Twitter](https://twitter.com/charmcli)
+* [The Fediverse](https://mastodon.technology/@charm)
+* [Slack](https://charm.sh/slack)
+
 ## License
 
 [MIT](https://github.com/charmbracelet/skate/raw/main/LICENSE)
 
 ***
 
-<a href="https://charm.sh/"><img alt="The Charm logo" src="https://stuff.charm.sh/charm-badge-unrounded.jpg" width="400"></a>
+Part of [Charm](https://charm.sh).
+
+<a href="https://charm.sh/"><img alt="The Charm logo" src="https://stuff.charm.sh/charm-badge.jpg" width="400"></a>
 
 Charm热爱开源 • Charm loves open source
