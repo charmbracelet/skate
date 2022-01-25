@@ -49,7 +49,7 @@ Use a package manager:
 brew tap charmbracelet/tap && brew install charmbracelet/tap/skate
 
 # Arch Linux (btw)
-yay -S skate
+pacman -S skate
 
 # Nix
 nix-env -iA nixpkgs.skate
