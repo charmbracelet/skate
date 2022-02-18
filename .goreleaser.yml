@@ -4,8 +4,8 @@ includes:
 
 variables:
   binary_name: skate
-  description: "A tasty, self-hostable Git server for the command line🍦"
-  github_url: "https://github.com/charmbracelet/soft-serve"
+  description: "A personal key value store 🛼"
+  github_url: "https://github.com/charmbracelet/skate"
   maintainer: "Christian Rocha <christian@charm.sh>"
   brew_commit_author_name: "Christian Rocha"
   brew_commit_author_email: "christian@charm.sh"
