@@ -3,8 +3,7 @@ includes:
       url: charmbracelet/meta/main/goreleaser-semi.yaml
 
 variables:
-  main: "./cmd/soft"
-  binary_name: soft
+  binary_name: skate
   description: "A tasty, self-hostable Git server for the command line🍦"
   github_url: "https://github.com/charmbracelet/soft-serve"
   maintainer: "Christian Rocha <christian@charm.sh>"
