@@ -38,6 +38,13 @@ skate get 猫咪
 
 # For more info
 skate --help
+
+# Do creative things with skate list
+skate set penelope marmalade
+skate set christian tacos
+skate set muesli muesli
+
+skate list | xargs -n 2 printf '%s loves %s.\n'
 ```
 
 ## Installation
@@ -153,6 +160,7 @@ local network. For details, see the [Charm docs][selfhost].
 
 Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
 you’d like to build a tool that includes a user key value store, check it out.
+Skate has the same functionality as `charm kv`, but it uses a separate database. 
 
 ## Feedback
 
