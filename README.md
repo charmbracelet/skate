@@ -92,6 +92,24 @@ go install github.com/charmbracelet/skate@latest
 
 ## Other Features
 
+### List Filters
+```bash
+# list keys only
+skate list -k
+
+# list values only
+skate list -v
+
+# reverse lexicographic order
+skate list -r
+
+# add a custom delimeter between keys and values; default is a tab
+skate list -d "\t"
+
+# show binary values
+skate list -b
+```
+
 ### Databases
 
 Sometimes you’ll want to separate your data into different databases:
