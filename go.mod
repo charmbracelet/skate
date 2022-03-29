@@ -3,7 +3,7 @@ module github.com/charmbracelet/skate
 go 1.17
 
 require (
-	github.com/charmbracelet/charm v0.10.0
+	github.com/charmbracelet/charm v0.11.0
 	github.com/dgraph-io/badger/v3 v3.2011.1
 	github.com/spf13/cobra v1.0.0
 )
@@ -12,15 +12,16 @@ require (
 	github.com/DataDog/zstd v1.4.1 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/auth0/go-jwt-middleware/v2 v2.0.0-beta // indirect
+	github.com/beorn7/perks v1.0.0 // indirect
 	github.com/caarlos0/env/v6 v6.9.1 // indirect
 	github.com/calmh/randomart v1.1.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/charmbracelet/bubbles v0.8.0 // indirect
-	github.com/charmbracelet/bubbletea v0.19.1 // indirect
-	github.com/charmbracelet/keygen v0.1.2 // indirect
-	github.com/charmbracelet/lipgloss v0.4.0 // indirect
-	github.com/charmbracelet/wish v0.2.1-0.20220201011151-beb5f0cf971c // indirect
-	github.com/containerd/console v1.0.2 // indirect
+	github.com/charmbracelet/bubbles v0.10.3 // indirect
+	github.com/charmbracelet/bubbletea v0.20.0 // indirect
+	github.com/charmbracelet/keygen v0.2.1 // indirect
+	github.com/charmbracelet/lipgloss v0.5.0 // indirect
+	github.com/charmbracelet/wish v0.2.1 // indirect
+	github.com/containerd/console v1.0.3 // indirect
 	github.com/dgraph-io/ristretto v0.0.4-0.20210122082011-bb5d392ed82d // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/gliderlabs/ssh v0.3.3 // indirect
@@ -36,6 +37,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/meowgorithm/babylogger v1.2.0 // indirect
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -43,9 +45,13 @@ require (
 	github.com/muesli/go-app-paths v0.2.1 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/sasquatch v0.0.0-20200811221207-66979d92330a // indirect
-	github.com/muesli/termenv v0.9.0 // indirect
+	github.com/muesli/termenv v0.11.1-0.20220212125758-44cd13922739 // indirect
 	github.com/muesli/toktok v0.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_golang v0.9.3 // indirect
+	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
+	github.com/prometheus/common v0.4.0 // indirect
+	github.com/prometheus/procfs v0.0.0-20190507164030-5867b95ac084 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -63,13 +69,13 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
-	modernc.org/cc/v3 v3.35.18 // indirect
-	modernc.org/ccgo/v3 v3.12.82 // indirect
-	modernc.org/libc v1.11.87 // indirect
+	modernc.org/cc/v3 v3.35.22 // indirect
+	modernc.org/ccgo/v3 v3.15.14 // indirect
+	modernc.org/libc v1.14.6 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.5 // indirect
 	modernc.org/opt v0.1.1 // indirect
-	modernc.org/sqlite v1.14.2 // indirect
+	modernc.org/sqlite v1.14.8 // indirect
 	modernc.org/strutil v1.1.1 // indirect
 	modernc.org/token v1.0.0 // indirect
 )
