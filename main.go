@@ -71,7 +71,7 @@ var (
 		Use:    "list-dbs",
 		Hidden: false,
 		Short:  "List databases.",
-		Args:   cobra.MaximumNArgs(0),
+		Args:   cobra.NoArgs,
 		RunE:   listDbs,
 	}
 
