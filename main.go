@@ -68,6 +68,14 @@ var (
 		RunE:   list,
 	}
 
+	listDbsCmd = &cobra.Command{
+		Use:    "list-dbs",
+		Hidden: false,
+		Short:  "List databases.",
+		Args:   cobra.MaximumNArgs(0),
+		RunE:   listDbs,
+	}
+
 	syncCmd = &cobra.Command{
 		Use:    "sync [@DB]",
 		Hidden: false,
@@ -129,6 +137,23 @@ func delete(cmd *cobra.Command, args []string) error {
 	return db.Delete(k)
 }
 
+func listDbs(cmd *cobra.Command, args []string) error {
+	db, err := openKV("")
+	if err != nil {
+		return err
+	}
+	db.Sync()
+  pn := filepath.Join(os.Getenv("CHARMPATH"), db.Client().Config.Host, "/kv/")
+  dbs, err := os.ReadDir(pn)
+  if err != nil {
+    return err
+  }
+  for _, d := range dbs {
+    fmt.Println("@" + d.Name())
+  }
+  return nil
+}
+
 func list(cmd *cobra.Command, args []string) error {
 	var k string
 	var pf string
@@ -149,17 +174,6 @@ func list(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	db.Sync()
-	if len(args) == 0 {
-		pn := filepath.Join(os.Getenv("CHARMPATH"), db.Client().Config.Host, "/kv/")
-		dbs, err := os.ReadDir(pn)
-		if err != nil {
-			return err
-		}
-		for _, d := range dbs {
-			fmt.Println("@" + d.Name())
-		}
-		return nil
-	}
 	return db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
@@ -286,6 +300,7 @@ func init() {
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(deleteCmd)
 	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(listDbsCmd)
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(resetCmd)
 	rootCmd.AddCommand(cmd.LinkCmd("skate"))
