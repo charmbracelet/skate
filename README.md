@@ -83,6 +83,9 @@ skate set "office rumor"@work-stuff "penelope likes marmalade"
 skate get "office rumor"@work-stuff
 skate list @work-stuff
 
+# Wait, what was that db named?
+skate list-dbs
+
 # Oh no, the boss is coming!
 skate reset @work-stuff
 ```
