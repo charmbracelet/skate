@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"unicode/utf8"
 
@@ -143,8 +142,11 @@ func listDbs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	db.Sync()
-  pn := filepath.Join(os.Getenv("CHARMPATH"), db.Client().Config.Host, "/kv/")
-  dbs, err := os.ReadDir(pn)
+  pn, err := db.Client().DataPath()
+  if err != nil {
+    return err
+  }
+  dbs, err := os.ReadDir(pn + "/kv/")
   if err != nil {
     return err
   }
