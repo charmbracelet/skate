@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode/utf8"
 
@@ -148,6 +149,17 @@ func list(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	db.Sync()
+	if len(args) == 0 {
+		pn := filepath.Join(os.Getenv("CHARMPATH"), db.Client().Config.Host, "/kv/")
+		dbs, err := os.ReadDir(pn)
+		if err != nil {
+			return err
+		}
+		for _, d := range dbs {
+			fmt.Println("@" + d.Name())
+		}
+		return nil
+	}
 	return db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
