@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -168,7 +167,7 @@ func list(cmd *cobra.Command, args []string) error {
 		var err error
 		pf, err = strconv.Unquote(fmt.Sprintf(`"%%s%s%%s\n"`, delimiterIterate))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 	if len(args) == 1 {
@@ -182,7 +181,10 @@ func list(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	db.Sync()
+	err = db.Sync()
+	if err != nil {
+		return err
+	}
 	return db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
