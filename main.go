@@ -147,7 +147,7 @@ func listDbs(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	dbs, err := os.ReadDir(filepath.Join(dd, "/kv/"))
+	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
 	if err != nil {
 		return err
 	}
