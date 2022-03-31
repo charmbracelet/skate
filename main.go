@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/charmbracelet/charm/ui/common"
@@ -137,23 +139,22 @@ func delete(cmd *cobra.Command, args []string) error {
 }
 
 func listDbs(cmd *cobra.Command, args []string) error {
-	db, err := openKV("")
+	cc, err := client.NewClientWithDefaults()
 	if err != nil {
 		return err
 	}
-	db.Sync()
-  pn, err := db.Client().DataPath()
-  if err != nil {
-    return err
-  }
-  dbs, err := os.ReadDir(pn + "/kv/")
-  if err != nil {
-    return err
-  }
-  for _, d := range dbs {
-    fmt.Println("@" + d.Name())
-  }
-  return nil
+	dd, err := cc.DataPath()
+	if err != nil {
+		return err
+	}
+	dbs, err := os.ReadDir(filepath.Join(dd, "/kv/"))
+	if err != nil {
+		return err
+	}
+	for _, d := range dbs {
+		fmt.Println("@" + d.Name())
+	}
+	return nil
 }
 
 func list(cmd *cobra.Command, args []string) error {
