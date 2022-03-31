@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -163,7 +165,11 @@ func list(cmd *cobra.Command, args []string) error {
 	if keysIterate || valuesIterate {
 		pf = "%s\n"
 	} else {
-		pf = fmt.Sprintf("%%s%s%%s\n", delimiterIterate)
+		var err error
+		pf, err = strconv.Unquote(fmt.Sprintf(`"%%s%s%%s\n"`, delimiterIterate))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	if len(args) == 1 {
 		k = args[0]
