@@ -152,7 +152,9 @@ func listDbs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	for _, d := range dbs {
-		fmt.Println("@" + d.Name())
+		if d.IsDir() {
+			fmt.Println("@" + d.Name())
+		}
 	}
 	return nil
 }
