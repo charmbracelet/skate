@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -165,7 +166,11 @@ func list(cmd *cobra.Command, args []string) error {
 	if keysIterate || valuesIterate {
 		pf = "%s\n"
 	} else {
-		pf = fmt.Sprintf("%%s%s%%s\n", delimiterIterate)
+		var err error
+		pf, err = strconv.Unquote(fmt.Sprintf(`"%%s%s%%s\n"`, delimiterIterate))
+		if err != nil {
+			return err
+		}
 	}
 	if len(args) == 1 {
 		k = args[0]
@@ -178,7 +183,10 @@ func list(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	db.Sync()
+	err = db.Sync()
+	if err != nil {
+		return err
+	}
 	return db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
