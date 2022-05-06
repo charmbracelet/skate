@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -72,6 +73,14 @@ var (
 		Short: "List databases.",
 		Args:  cobra.NoArgs,
 		RunE:  listDbs,
+	}
+
+	deleteDbCmd = &cobra.Command{
+		Use:    "delete-db",
+		Hidden: false,
+		Short:  "Delete a database",
+		Args:   cobra.MinimumNArgs(1),
+		RunE:   deleteDb,
 	}
 
 	syncCmd = &cobra.Command{
@@ -168,6 +177,43 @@ func listDbs(cmd *cobra.Command, args []string) error {
 		if d.IsDir() {
 			fmt.Println("@" + d.Name())
 		}
+	}
+	return nil
+}
+
+func deleteDb(cmd *cobra.Command, args []string) error {
+	target := filepath.Clean(args[0])
+	var found bool
+	cc, err := client.NewClientWithDefaults()
+	if err != nil {
+		return err
+	}
+	dd, err := cc.DataPath()
+	if err != nil {
+		return err
+	}
+	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
+	if err != nil {
+		return err
+	}
+	for _, d := range dbs {
+		if d.IsDir() && d.Name() == target {
+			found = true
+			var confirmation string
+			fmt.Println("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)")
+			fmt.Scanln(&confirmation)
+			if confirmation == "y" {
+				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				fmt.Println("did not delete " + d.Name())
+			}
+		}
+	}
+	if !found {
+		fmt.Println(target + " does not exist")
 	}
 	return nil
 }
@@ -328,6 +374,7 @@ func init() {
 		deleteCmd,
 		listCmd,
 		listDbsCmd,
+		deleteDbCmd,
 		syncCmd,
 		resetCmd,
 		cmd.LinkCmd("skate"),
