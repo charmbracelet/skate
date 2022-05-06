@@ -163,7 +163,7 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(valueStyle.Render(string(v)))
+	fmt.Println(string(v))
 	return nil
 }
 
