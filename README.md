@@ -160,7 +160,18 @@ local network. For details, see the [Charm docs][selfhost].
 
 Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
 you’d like to build a tool that includes a user key value store, check it out.
-Skate has the same functionality as `charm kv`, but it uses a separate database. 
+Skate has the same functionality as `charm kv`, but it uses a separate database.
+
+## FAQ
+
+<details>
+	<summary>Are there any file size limits?</summary>
+	<p>There are no limitations in file size per se, although there's a 1 GB cap on storage for the free charm accounts, but you can get unlimited if you self-host the Charm Cloud.</p>
+</details>
+<details>
+	<summary>Is it possible to not have a local copy of the database?</summary>
+	<p>No. Skate uses BadgerDB and keeps a local copy of the key-value store. The local databases are synced through the Charm Cloud.</p>
+</details>
 
 ## Feedback
 
