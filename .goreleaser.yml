@@ -6,6 +6,6 @@ variables:
   binary_name: skate
   description: "A personal key value store 🛼"
   github_url: "https://github.com/charmbracelet/skate"
-  maintainer: "Christian Rocha <christian@charm.sh>"
-  brew_commit_author_name: "Christian Rocha"
-  brew_commit_author_email: "christian@charm.sh"
+  maintainer: "Ayman Bagabas <ayman@charm.sh>"
+  brew_commit_author_name: "Ayman Bagabas"
+  brew_commit_author_email: "ayman@charm.sh"
