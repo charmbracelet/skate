@@ -13,6 +13,8 @@ import (
 	"github.com/charmbracelet/charm/kv"
 	"github.com/charmbracelet/charm/ui/common"
 	"github.com/dgraph-io/badger/v3"
+	mcobra "github.com/muesli/mango-cobra"
+	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 )
 
@@ -27,26 +29,23 @@ var (
 	delimiterIterate string
 
 	rootCmd = &cobra.Command{
-		Use:    "",
-		Hidden: false,
-		Short:  "Skate, a personal key value store.",
-		Args:   cobra.NoArgs,
+		Use:   "skate",
+		Short: "Skate, a personal key value store.",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
 	setCmd = &cobra.Command{
-		Use:    "set KEY[@DB] VALUE",
-		Hidden: false,
-		Short:  "Set a value for a key with an optional @ db.",
-		Args:   cobra.MaximumNArgs(2),
-		RunE:   set,
+		Use:   "set KEY[@DB] VALUE",
+		Short: "Set a value for a key with an optional @ db.",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  set,
 	}
 
 	getCmd = &cobra.Command{
 		Use:           "get KEY[@DB]",
-		Hidden:        false,
 		Short:         "Get a value for a key with an optional @ db.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -55,43 +54,56 @@ var (
 	}
 
 	deleteCmd = &cobra.Command{
-		Use:    "delete KEY[@DB]",
-		Hidden: false,
-		Short:  "Delete a key with an optional @ db.",
-		Args:   cobra.ExactArgs(1),
-		RunE:   delete,
+		Use:   "delete KEY[@DB]",
+		Short: "Delete a key with an optional @ db.",
+		Args:  cobra.ExactArgs(1),
+		RunE:  delete,
 	}
 
 	listCmd = &cobra.Command{
-		Use:    "list [@DB]",
-		Hidden: false,
-		Short:  "List key value pairs with an optional @ db.",
-		Args:   cobra.MaximumNArgs(1),
-		RunE:   list,
+		Use:   "list [@DB]",
+		Short: "List key value pairs with an optional @ db.",
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  list,
 	}
 
 	listDbsCmd = &cobra.Command{
-		Use:    "list-dbs",
-		Hidden: false,
-		Short:  "List databases.",
-		Args:   cobra.NoArgs,
-		RunE:   listDbs,
+		Use:   "list-dbs",
+		Short: "List databases.",
+		Args:  cobra.NoArgs,
+		RunE:  listDbs,
 	}
 
 	syncCmd = &cobra.Command{
-		Use:    "sync [@DB]",
-		Hidden: false,
-		Short:  "Sync local db with latest Charm Cloud db.",
-		Args:   cobra.MaximumNArgs(1),
-		RunE:   sync,
+		Use:   "sync [@DB]",
+		Short: "Sync local db with latest Charm Cloud db.",
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  sync,
 	}
 
 	resetCmd = &cobra.Command{
-		Use:    "reset [@DB]",
-		Hidden: false,
-		Short:  "Delete local db and pull down fresh copy from Charm Cloud.",
-		Args:   cobra.MaximumNArgs(1),
-		RunE:   reset,
+		Use:   "reset [@DB]",
+		Short: "Delete local db and pull down fresh copy from Charm Cloud.",
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  reset,
+	}
+
+	manCmd = &cobra.Command{
+		Use:    "man",
+		Short:  "Generate man pages",
+		Args:   cobra.NoArgs,
+		Hidden: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			manPage, err := mcobra.NewManPage(1, rootCmd) //.
+			if err != nil {
+				return err
+			}
+
+			manPage = manPage.WithSection("Copyright", "(C) 2021-2022 Charmbracelet, Inc.\n"+
+				"Released under MIT license.")
+			fmt.Println(manPage.Build(roff.NewDocument()))
+			return nil
+		},
 	}
 )
 
@@ -301,6 +313,7 @@ func init() {
 		Version = "unknown (built from source)"
 	}
 	rootCmd.Version = Version
+	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 
 	listCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "list in reverse lexicographic order")
 	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
@@ -309,14 +322,17 @@ func init() {
 	listCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 	getCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 
-	rootCmd.AddCommand(getCmd)
-	rootCmd.AddCommand(setCmd)
-	rootCmd.AddCommand(deleteCmd)
-	rootCmd.AddCommand(listCmd)
-	rootCmd.AddCommand(listDbsCmd)
-	rootCmd.AddCommand(syncCmd)
-	rootCmd.AddCommand(resetCmd)
-	rootCmd.AddCommand(cmd.LinkCmd("skate"))
+	rootCmd.AddCommand(
+		getCmd,
+		setCmd,
+		deleteCmd,
+		listCmd,
+		listDbsCmd,
+		syncCmd,
+		resetCmd,
+		cmd.LinkCmd("skate"),
+		manCmd,
+	)
 }
 
 func main() {
