@@ -172,7 +172,15 @@ local network. For details, see the [Charm docs][selfhost].
 
 Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
 you’d like to build a tool that includes a user key value store, check it out.
-Skate has the same functionality as `charm kv`, but it uses a separate database. 
+Skate has the same functionality as `charm kv`, but it uses a separate database.
+
+## FAQ
+
+Skate is built off of [Charm FS][charm].
+Refer to [its FAQ][faq] for more info.
+
+[charm]: https://github.com/charmbracelet/charm
+[faq]: https://github.com/charmbracelet/charm#faq
 
 ## Feedback
 
