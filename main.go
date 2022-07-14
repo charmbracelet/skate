@@ -12,16 +12,34 @@ import (
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/charmbracelet/charm/ui/common"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v3"
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 )
 
+// styles.
+var (
+	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	keyStyle  = lipgloss.NewStyle().
+			Align(lipgloss.Left).
+			Foreground(lipgloss.Color("#FAFAFA")).
+			Background(highlight).
+			Margin(1, 1, 0, 0).
+			Padding(0, 1)
+	valueStyle = lipgloss.NewStyle().
+			Align(lipgloss.Left).
+			Foreground(lipgloss.AdaptiveColor{Light: "#969B86", Dark: "#696969"}).
+			Margin(1, 2, 0, 0).
+			Padding(0, 1)
+)
+
 var (
 	Version   = ""
 	CommitSHA = ""
 
+	pretty           bool
 	reverseIterate   bool
 	keysIterate      bool
 	valuesIterate    bool
@@ -135,7 +153,7 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	printFromKV("%s", v)
+	fmt.Println(valueStyle.Render(string(v)))
 	return nil
 }
 
@@ -216,11 +234,7 @@ func list(cmd *cobra.Command, args []string) error {
 				continue
 			}
 			err := item.Value(func(v []byte) error {
-				if valuesIterate {
-					printFromKV(pf, v)
-				} else {
-					printFromKV(pf, k, v)
-				}
+				printFromKV(pf, k, v)
 				return nil
 			})
 			if err != nil {
@@ -266,14 +280,30 @@ func nameFromArgs(args []string) (string, error) {
 	return n, nil
 }
 
-func printFromKV(pf string, vs ...[]byte) {
+func printFromKV(pf string, k []byte, vs ...[]byte) {
 	nb := "(omitted binary data)"
 	fvs := make([]interface{}, 0)
-	for _, v := range vs {
-		if common.IsTTY() && !showBinary && !utf8.Valid(v) {
-			fvs = append(fvs, nb)
-		} else {
-			fvs = append(fvs, string(v))
+	if !pretty {
+		if !valuesIterate {
+			fvs = append(fvs, string(k))
+		}
+		for _, v := range vs {
+			if common.IsTTY() && !showBinary && !utf8.Valid(v) {
+				fvs = append(fvs, nb)
+			} else {
+				fvs = append(fvs, string(v))
+			}
+		}
+	} else {
+		if !valuesIterate {
+			fvs = append(fvs, keyStyle.Render(string(k)))
+		}
+		for _, v := range vs {
+			if common.IsTTY() && !showBinary && !utf8.Valid(v) {
+				fvs = append(fvs, valueStyle.Render(nb))
+			} else {
+				fvs = append(fvs, valueStyle.Render(string(v)))
+			}
 		}
 	}
 	fmt.Printf(pf, fvs...)
@@ -318,6 +348,7 @@ func init() {
 	listCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "list in reverse lexicographic order")
 	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
 	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
+	listCmd.Flags().BoolVarP(&pretty, "pretty", "p", false, "output with styling")
 	listCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
 	listCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 	getCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
