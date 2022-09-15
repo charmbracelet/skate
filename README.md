@@ -168,6 +168,9 @@ local network. For details, see the [Charm docs][selfhost].
 
 [selfhost]: https://github.com/charmbracelet/charm#self-hosting
 
+If you've finished setting up your very own Charm Cloud, great.
+To make `skate` connect to your self-hosted instance, you'll need to change the `CHARM_HOST` environment variable to point to the domain/IP of where you hosted your Charm Cloud.
+
 ## Hey, Developers
 
 Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
