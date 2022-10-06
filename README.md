@@ -62,7 +62,8 @@ pacman -S skate
 nix-env -iA nixpkgs.skate
 
 # Debian/Ubuntu
-echo 'deb [trusted=yes] https://repo.charm.sh/apt/ /' | sudo tee /etc/apt/sources.list.d/charm.list
+echo "deb https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+curl https://repo.charm.sh/apt/gpg.key | sudo apt-key add -
 sudo apt update && sudo apt install skate
 
 # Fedora
@@ -70,7 +71,8 @@ echo '[charm]
 name=Charm
 baseurl=https://repo.charm.sh/yum/
 enabled=1
-gpgcheck=0' | sudo tee /etc/yum.repos.d/charm.repo
+gpgcheck=1
+gpgkey=https://repo.charm.sh/yum/gpg.key' | sudo tee /etc/yum.repos.d/charm.repo
 sudo yum install skate
 ```
 
