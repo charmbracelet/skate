@@ -7,7 +7,7 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jacobsa/crypto v0.0.0-20190317225127-9f44e2d11115 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
@@ -76,7 +76,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
 	modernc.org/cc/v3 v3.36.0 // indirect
 	modernc.org/ccgo/v3 v3.16.8 // indirect
