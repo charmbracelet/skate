@@ -53,7 +53,7 @@ Use a package manager:
 
 ```bash
 # macOS or Linux
-brew tap charmbracelet/tap && brew install charmbracelet/tap/skate
+brew install charmbracelet/tap/skate
 
 # Arch Linux (btw)
 pacman -S skate
