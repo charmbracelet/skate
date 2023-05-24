@@ -183,27 +183,31 @@ What do you use `skate` for? [Let us know](mailto:vt100@charm.sh).
 
 ## Self-Hosting
 
-Skate is backed by the Charm Cloud. By default it will use the Charm hosted
+Skate is backed by the Charm Cloud. By default, it will use the Charm hosted
 cloud, but it’s incredibly easy to self-host, even if that’s just on your
 local network. For details, see the [Charm docs][selfhost].
 
 [selfhost]: https://github.com/charmbracelet/charm#self-hosting
 
 If you've finished setting up your very own Charm Cloud, great.
-To make `skate` connect to your self-hosted instance, you'll need to change the `CHARM_HOST` environment variable to point to the domain/IP of where you hosted your Charm Cloud.
+To make `skate` connect to your self-hosted instance, you'll need to change the
+`CHARM_HOST` environment variable to point to the domain/IP of where you hosted
+your Charm Cloud. If you would like to change anything else about the Skate
+client, you can do so by changing the Charm client [environment
+variables][client-vars].
+
+[client-vars]: https://github.com/charmbracelet/charm#client-settings
 
 ## Hey, Developers
 
-Skate is built on [charm/kv](https://github.com/charmbracelet/charm#charm-kv). If
-you’d like to build a tool that includes a user key value store, check it out.
-Skate has the same functionality as `charm kv`, but it uses a separate database.
+Skate is built on [Charm KV][charm-kv]. If you’d like to build a tool that
+includes a user key value store, check it out. Skate has the same functionality
+as `charm kv`, but it uses a separate database.
 
-## FAQ
+If you have questions about the underlying file system Skate uses, head on over
+to our [Charm FS FAQ][faq].
 
-Skate is built off of [Charm FS][charm].
-Refer to [its FAQ][faq] for more info.
-
-[charm]: https://github.com/charmbracelet/charm
+[charm-kv]: https://github.com/charmbracelet/charm#charm-kv
 [faq]: https://github.com/charmbracelet/charm#faq
 
 ## Feedback
