@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/charmbracelet/charm/ui/common"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v3"
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
@@ -27,6 +28,8 @@ var (
 	valuesIterate    bool
 	showBinary       bool
 	delimiterIterate string
+
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B"))
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -203,7 +206,7 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		if d.IsDir() && d.Name() == n {
 			found = true
 			var confirmation string
-			fmt.Println("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)")
+			fmt.Println(warningStyle.Render("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)"))
 			fmt.Scanln(&confirmation)
 			if confirmation == "y" {
 				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
