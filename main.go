@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -209,7 +208,7 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 			if confirmation == "y" {
 				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			} else {
 				fmt.Println("did not delete " + d.Name())
