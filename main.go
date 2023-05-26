@@ -76,7 +76,7 @@ var (
 	}
 
 	deleteDbCmd = &cobra.Command{
-		Use:    "delete-db",
+		Use:    "delete-db [@DB]",
 		Hidden: false,
 		Short:  "Delete a database",
 		Args:   cobra.MinimumNArgs(1),
@@ -182,8 +182,10 @@ func listDbs(cmd *cobra.Command, args []string) error {
 }
 
 func deleteDb(cmd *cobra.Command, args []string) error {
-	target := filepath.Clean(args[0])
-	var found bool
+	n, err := nameFromArgs(args)
+	if err != nil {
+		return err
+	}
 	cc, err := client.NewClientWithDefaults()
 	if err != nil {
 		return err
@@ -196,8 +198,10 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	var found bool
 	for _, d := range dbs {
-		if d.IsDir() && d.Name() == target {
+		if d.IsDir() && d.Name() == n {
 			found = true
 			var confirmation string
 			fmt.Println("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)")
@@ -213,7 +217,7 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if !found {
-		fmt.Println(target + " does not exist")
+		fmt.Println(n + " does not exist")
 	}
 	return nil
 }
