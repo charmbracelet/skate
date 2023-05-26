@@ -219,7 +219,7 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if !found {
-		fmt.Println(n + " does not exist")
+		fmt.Println(args[0] + " does not exist")
 	}
 	return nil
 }
