@@ -19,6 +19,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const match = 2
+
+type suggestionNotFoundErr error
+
 var (
 	Version   = ""
 	CommitSHA = ""
@@ -163,24 +167,28 @@ func delete(cmd *cobra.Command, args []string) error {
 }
 
 func listDbs(cmd *cobra.Command, args []string) error {
+	list, err := getDbs()
+	for _, db := range list {
+		fmt.Println("@" + db.Name())
+	}
+	return err
+}
+
+// TODO: write test for this
+func getDbs() ([]os.DirEntry, error) {
 	cc, err := client.NewClientWithDefaults()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	dd, err := cc.DataPath()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	for _, d := range dbs {
-		if d.IsDir() {
-			fmt.Println("@" + d.Name())
-		}
-	}
-	return nil
+	return dbs, nil
 }
 
 func deleteDb(cmd *cobra.Command, args []string) error {
@@ -219,7 +227,48 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if !found {
-		fmt.Println(args[0] + " does not exist")
+		return dbNotFoundMsg(args[0])
+	}
+	return nil
+}
+
+// suggestions: a helper function for typo'd args
+func suggestions(opts []string, arg string) (string, error) {
+	for _, opt := range opts {
+		count := 0
+		for i := range arg[:match] {
+			if len(opt) > i+1 {
+				if arg[i] == opt[i+1] {
+					count++
+				}
+			}
+		}
+		if count == match {
+			return fmt.Sprintf("did you mean %s\n", opt), nil
+		}
+	}
+	return "", suggestionNotFoundErr(fmt.Errorf("no suggestions found"))
+}
+
+// dbNotFoundMsg: formatted messaging for when a database is not found
+func dbNotFoundMsg(arg string) error {
+	dbs, err := getDbs()
+	if err != nil {
+		return err
+	}
+
+	var opts []string
+	for _, d := range dbs {
+		if d.IsDir() {
+			opts = append(opts, ("@" + d.Name()))
+		}
+	}
+
+	sug, err := suggestions(opts, arg)
+	if _, ok := err.(suggestionNotFoundErr); ok {
+		fmt.Println("unable to find a match, try using 'skate list-dbs' to see the available databases.")
+	} else {
+		fmt.Printf("%s does not exist, %s\n", arg, sug)
 	}
 	return nil
 }
