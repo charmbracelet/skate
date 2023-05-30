@@ -167,15 +167,15 @@ func delete(cmd *cobra.Command, args []string) error {
 }
 
 func listDbs(cmd *cobra.Command, args []string) error {
-	list, err := getDbs()
-	for _, db := range list {
-		fmt.Println("@" + db.Name())
+	dbs, err := getDbs()
+	for _, db := range dbs {
+		fmt.Println(db)
 	}
 	return err
 }
 
-// TODO: write test for this
-func getDbs() ([]os.DirEntry, error) {
+// getDbs: returns a formatted list of available skate DBs
+func getDbs() ([]string, error) {
 	cc, err := client.NewClientWithDefaults()
 	if err != nil {
 		return nil, err
@@ -184,11 +184,18 @@ func getDbs() ([]os.DirEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
+	entries, err := os.ReadDir(filepath.Join(dd, "kv"))
 	if err != nil {
 		return nil, err
 	}
-	return dbs, nil
+
+	var out []string
+	for _, e := range entries {
+		if e.IsDir() {
+			out = append(out, "@"+e.Name())
+		}
+	}
+	return out, nil
 }
 
 func deleteDb(cmd *cobra.Command, args []string) error {
@@ -257,14 +264,7 @@ func dbNotFoundMsg(arg string) error {
 		return err
 	}
 
-	var opts []string
-	for _, d := range dbs {
-		if d.IsDir() {
-			opts = append(opts, ("@" + d.Name()))
-		}
-	}
-
-	sug, err := suggestions(opts, arg)
+	sug, err := suggestions(dbs, arg)
 	if _, ok := err.(suggestionNotFoundErr); ok {
 		fmt.Println("unable to find a match, try using 'skate list-dbs' to see the available databases.")
 	} else {
