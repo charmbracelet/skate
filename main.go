@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/agnivade/levenshtein"
 	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
@@ -19,9 +20,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const match = 2
-
-type suggestionNotFoundErr error
+// distance: an arbitrary number to dictate suggestions
+const distance = 3
 
 var (
 	Version   = ""
@@ -33,7 +33,8 @@ var (
 	showBinary       bool
 	delimiterIterate string
 
-	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B"))
+	warningStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
+	highlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5FD2"))
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -174,7 +175,7 @@ func listDbs(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-// getDbs: returns a formatted list of available skate DBs
+// getDbs: returns a formatted list of available Skate DBs
 func getDbs() ([]string, error) {
 	cc, err := client.NewClientWithDefaults()
 	if err != nil {
@@ -198,7 +199,9 @@ func getDbs() ([]string, error) {
 	return out, nil
 }
 
+// deleteDb: delete a Skate database.
 func deleteDb(cmd *cobra.Command, args []string) error {
+	// get client info
 	n, err := nameFromArgs(args)
 	if err != nil {
 		return err
@@ -211,66 +214,53 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
-	if err != nil {
-		return err
-	}
 
-	var found bool
-	for _, d := range dbs {
-		if d.IsDir() && d.Name() == n {
-			found = true
-			var confirmation string
-			fmt.Println(warningStyle.Render("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)"))
-			fmt.Scanln(&confirmation)
-			if confirmation == "y" {
-				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
-				if err != nil {
-					return err
-				}
-			} else {
-				fmt.Println("did not delete " + d.Name())
-			}
+	// does input exist?
+	path := filepath.Join(dd, "kv", n)
+	_, err = os.Stat(path)
+
+	// name is in an invalid format
+	if n == "" || os.IsNotExist(err) {
+		fmt.Println(notFound(args[0]))
+	} else {
+		// gotcha!
+		var confirmation string
+		fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
+		fmt.Scanln(&confirmation)
+		if confirmation == "y" {
+			return os.RemoveAll(path)
 		}
-	}
-	if !found {
-		return dbNotFoundMsg(args[0])
+		fmt.Println("did not delete " + n)
 	}
 	return nil
 }
 
-// suggestions: a helper function for typo'd args
-func suggestions(opts []string, arg string) (string, error) {
-	for _, opt := range opts {
-		count := 0
-		for i := range arg[:match] {
-			if len(opt) > i+1 {
-				if arg[i] == opt[i+1] {
-					count++
-				}
-			}
-		}
-		if count == match {
-			return fmt.Sprintf("did you mean %s\n", opt), nil
-		}
+// notFound: displays a not found message with suggestions.
+func notFound(v string) string {
+	opts, _ := suggest(v)
+	dbs, _ := getDbs()
+	if len(opts) == 0 {
+		return fmt.Sprintf("unable to find a match, the available options are %q", strings.Join(dbs, ", "))
 	}
-	return "", suggestionNotFoundErr(fmt.Errorf("no suggestions found"))
+	return fmt.Sprintf("%s does not exist, did you mean %q", v, strings.Join(opts, ", "))
 }
 
-// dbNotFoundMsg: formatted messaging for when a database is not found
-func dbNotFoundMsg(arg string) error {
+// suggest: returns valid options based on values similar to input.
+func suggest(name string) ([]string, error) {
 	dbs, err := getDbs()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	sug, err := suggestions(dbs, arg)
-	if _, ok := err.(suggestionNotFoundErr); ok {
-		fmt.Println("unable to find a match, try using 'skate list-dbs' to see the available databases.")
-	} else {
-		fmt.Printf("%s does not exist, %s\n", arg, sug)
+	var suggestions []string
+	for _, db := range dbs {
+		levenshteinDistance := levenshtein.ComputeDistance(name, db)
+		suggestByLevenshtein := levenshteinDistance <= distance
+		suggestByPrefix := strings.HasPrefix(name, db[:distance])
+		if suggestByLevenshtein || suggestByPrefix {
+			suggestions = append(suggestions, db)
+		}
 	}
-	return nil
+	return suggestions, nil
 }
 
 func list(cmd *cobra.Command, args []string) error {
