@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
 	"github.com/charmbracelet/charm/ui/common"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v3"
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
@@ -27,6 +28,8 @@ var (
 	valuesIterate    bool
 	showBinary       bool
 	delimiterIterate string
+
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B"))
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -72,6 +75,14 @@ var (
 		Short: "List databases.",
 		Args:  cobra.NoArgs,
 		RunE:  listDbs,
+	}
+
+	deleteDbCmd = &cobra.Command{
+		Use:    "delete-db [@DB]",
+		Hidden: false,
+		Short:  "Delete a database",
+		Args:   cobra.MinimumNArgs(1),
+		RunE:   deleteDb,
 	}
 
 	syncCmd = &cobra.Command{
@@ -168,6 +179,47 @@ func listDbs(cmd *cobra.Command, args []string) error {
 		if d.IsDir() {
 			fmt.Println("@" + d.Name())
 		}
+	}
+	return nil
+}
+
+func deleteDb(cmd *cobra.Command, args []string) error {
+	n, err := nameFromArgs(args)
+	if err != nil {
+		return err
+	}
+	cc, err := client.NewClientWithDefaults()
+	if err != nil {
+		return err
+	}
+	dd, err := cc.DataPath()
+	if err != nil {
+		return err
+	}
+	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
+	if err != nil {
+		return err
+	}
+
+	var found bool
+	for _, d := range dbs {
+		if d.IsDir() && d.Name() == n {
+			found = true
+			var confirmation string
+			fmt.Println(warningStyle.Render("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)"))
+			fmt.Scanln(&confirmation)
+			if confirmation == "y" {
+				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
+				if err != nil {
+					return err
+				}
+			} else {
+				fmt.Println("did not delete " + d.Name())
+			}
+		}
+	}
+	if !found {
+		fmt.Println(args[0] + " does not exist")
 	}
 	return nil
 }
@@ -328,6 +380,7 @@ func init() {
 		deleteCmd,
 		listCmd,
 		listDbsCmd,
+		deleteDbCmd,
 		syncCmd,
 		resetCmd,
 		cmd.LinkCmd("skate"),
