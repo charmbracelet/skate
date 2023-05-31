@@ -252,7 +252,7 @@ func findDb(name string, dbs []string) (string, error) {
 		return "", err
 	}
 	_, err = os.Stat(path)
-	if os.IsNotExist(err) {
+	if sName == "" || os.IsNotExist(err) {
 		dbs, err := getDbs()
 		if err != nil {
 			return "", err
@@ -262,7 +262,8 @@ func findDb(name string, dbs []string) (string, error) {
 			levenshteinDistance := levenshtein.ComputeDistance(name, db)
 			suggestByLevenshtein := levenshteinDistance <= distance
 			suggestByPrefix := strings.HasPrefix(name, db[:distance])
-			if suggestByLevenshtein || suggestByPrefix {
+			suggestByPrefixAlt := strings.HasPrefix("@"+name, db[:distance])
+			if suggestByLevenshtein || suggestByPrefix || suggestByPrefixAlt {
 				suggestions = append(suggestions, db)
 			}
 		}
