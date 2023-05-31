@@ -177,19 +177,14 @@ func listDbs(cmd *cobra.Command, args []string) error {
 
 // getDbs: returns a formatted list of available Skate DBs
 func getDbs() ([]string, error) {
-	cc, err := client.NewClientWithDefaults()
+	filepath, err := getFilePath()
 	if err != nil {
 		return nil, err
 	}
-	dd, err := cc.DataPath()
+	entries, err := os.ReadDir(filepath)
 	if err != nil {
 		return nil, err
 	}
-	entries, err := os.ReadDir(filepath.Join(dd, "kv"))
-	if err != nil {
-		return nil, err
-	}
-
 	var out []string
 	for _, e := range entries {
 		if e.IsDir() {
@@ -199,6 +194,19 @@ func getDbs() ([]string, error) {
 	return out, nil
 }
 
+// getFilePath: get the file path to the skate databases.
+func getFilePath(args ...string) (string, error) {
+	cc, err := client.NewClientWithDefaults()
+	if err != nil {
+		return "", err
+	}
+	dd, err := cc.DataPath()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(append([]string{dd, "kv"}, args...)...), err
+}
+
 // deleteDb: delete a Skate database.
 func deleteDb(cmd *cobra.Command, args []string) error {
 	// get client info
@@ -206,24 +214,14 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	cc, err := client.NewClientWithDefaults()
+	path, err := getFilePath(n)
 	if err != nil {
 		return err
 	}
-	dd, err := cc.DataPath()
-	if err != nil {
-		return err
-	}
-
-	// does input exist?
-	path := filepath.Join(dd, "kv", n)
 	_, err = os.Stat(path)
-
-	// name is in an invalid format
 	if n == "" || os.IsNotExist(err) {
 		fmt.Println(notFound(args[0]))
 	} else {
-		// gotcha!
 		var confirmation string
 		fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
 		fmt.Scanln(&confirmation)
@@ -240,7 +238,7 @@ func notFound(v string) string {
 	opts, _ := suggest(v)
 	dbs, _ := getDbs()
 	if len(opts) == 0 {
-		return fmt.Sprintf("unable to find a match, the available options are %q", strings.Join(dbs, ", "))
+		return fmt.Sprintf("%s does not exist, the available options are %q", v, strings.Join(dbs, ", "))
 	}
 	return fmt.Sprintf("%s does not exist, did you mean %q", v, strings.Join(opts, ", "))
 }
