@@ -226,8 +226,9 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	path, err := findDb(args[0], dbs)
-	if errors.Is(err, suggestionNotFoundErr{}) {
-		fmt.Printf("%q does not exist, %s", args[0], err.Error())
+	var notFoundErr suggestionNotFoundErr
+	if errors.As(err, &notFoundErr) {
+		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
 		os.Exit(1)
 	}
 	var confirmation string

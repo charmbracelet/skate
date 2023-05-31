@@ -75,8 +75,12 @@ func TestFindDbs(t *testing.T) {
 	for _, tc := range tests {
 		_, err := findDb(tc.name, tc.dbs)
 		if tc.err != nil {
-			if err == nil || errors.Is(err, suggestionNotFoundErr{}) {
+			if err == nil {
 				t.Fatalf("expected an error, got: %v", err)
+			}
+			var perr suggestionNotFoundErr
+			if !errors.As(err, &perr) {
+				t.Fatalf("something went wrong! got: %v", err)
 			}
 			if len(err.(suggestionNotFoundErr).suggestions) !=
 				len(tc.err.(suggestionNotFoundErr).suggestions) {
