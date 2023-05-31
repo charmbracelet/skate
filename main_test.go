@@ -19,48 +19,50 @@ func TestFindDbs(t *testing.T) {
 		{
 			name: "@spon",
 			dbs:  defaultDbs,
-			err: dbNotFoundErr{
-				name: "@spon",
+			err: suggestionNotFoundErr{
 				suggestions: []string{
 					"@spongebob",
 				},
-				isEmpty: false,
+			},
+		},
+		{
+			name: "@char",
+			dbs:  defaultDbs,
+			err: suggestionNotFoundErr{
+				suggestions: []string{
+					"@charm.sh.kv.user.default",
+					"@charm.sh.skate.default",
+				},
 			},
 		},
 		{
 			name: "spon",
 			dbs:  defaultDbs,
-			err: dbNotFoundErr{
-				name:        "spon",
-				suggestions: defaultDbs,
-				isEmpty:     false,
+			err: suggestionNotFoundErr{
+				suggestions: []string{
+					"@spongebob",
+				},
 			},
 		},
 		{
 			name: "",
 			dbs:  defaultDbs,
-			err: dbNotFoundErr{
-				name:        "spon",
-				suggestions: defaultDbs,
-				isEmpty:     true,
+			err: suggestionNotFoundErr{
+				suggestions: nil,
 			},
 		},
 		{
 			name: "endo",
 			dbs:  defaultDbs,
-			err: dbNotFoundErr{
-				name:        "spon",
-				suggestions: defaultDbs,
-				isEmpty:     true,
+			err: suggestionNotFoundErr{
+				suggestions: nil,
 			},
 		},
 		{
 			name: "@endo",
 			dbs:  defaultDbs,
-			err: dbNotFoundErr{
-				name:        "spon",
-				suggestions: defaultDbs,
-				isEmpty:     true,
+			err: suggestionNotFoundErr{
+				suggestions: nil,
 			},
 		},
 		{
@@ -73,13 +75,12 @@ func TestFindDbs(t *testing.T) {
 	for _, tc := range tests {
 		_, err := findDb(tc.name, tc.dbs)
 		if tc.err != nil {
-			if err == nil || errors.Is(err, dbNotFoundErr{}) {
+			if err == nil || errors.Is(err, suggestionNotFoundErr{}) {
 				t.Fatalf("expected an error, got: %v", err)
 			}
-			gIsEmpty := err.(dbNotFoundErr).isEmpty
-			wIsEmpty := tc.err.(dbNotFoundErr).isEmpty
-			if gIsEmpty != wIsEmpty {
-				t.Fatalf("got: %t, want: %t", gIsEmpty, wIsEmpty)
+			if len(err.(suggestionNotFoundErr).suggestions) !=
+				len(tc.err.(suggestionNotFoundErr).suggestions) {
+				t.Fatalf("got != want. got: %v, want: %v", err, tc.err)
 			}
 		}
 		if err != nil && tc.err == nil {

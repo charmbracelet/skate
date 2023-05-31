@@ -124,17 +124,15 @@ var (
 	}
 )
 
-type dbNotFoundErr struct {
-	name        string
+type suggestionNotFoundErr struct {
 	suggestions []string
-	isEmpty     bool
 }
 
-func (e dbNotFoundErr) Error() string {
-	if e.isEmpty {
-		return fmt.Sprintf("%q does not exist, the available options are %q", e.name, strings.Join(e.suggestions, ", "))
+func (e suggestionNotFoundErr) Error() string {
+	if len(e.suggestions) == 0 {
+		return "no suggestions found"
 	}
-	return fmt.Sprintf("%q does not exist, did you mean %q", e.name, strings.Join(e.suggestions, ", "))
+	return fmt.Sprintf("did you mean %q", strings.Join(e.suggestions, ", "))
 }
 
 func set(cmd *cobra.Command, args []string) error {
@@ -228,8 +226,8 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	path, err := findDb(args[0], dbs)
-	if e, ok := err.(dbNotFoundErr); ok {
-		fmt.Println(e.Error())
+	if errors.Is(err, suggestionNotFoundErr{}) {
+		fmt.Printf("%q does not exist, %s", args[0], err.Error())
 		os.Exit(1)
 	}
 	var confirmation string
@@ -268,10 +266,7 @@ func findDb(name string, dbs []string) (string, error) {
 				suggestions = append(suggestions, db)
 			}
 		}
-		if len(suggestions) == 0 {
-			return "", dbNotFoundErr{name: name, suggestions: dbs, isEmpty: true}
-		}
-		return "", dbNotFoundErr{name: name, suggestions: suggestions, isEmpty: false}
+		return "", suggestionNotFoundErr{suggestions: suggestions}
 	}
 	return path, nil
 }
