@@ -123,6 +123,19 @@ var (
 	}
 )
 
+type dbNotFoundErr struct {
+	name        string
+	suggestions []string
+	isEmpty     bool
+}
+
+func (e dbNotFoundErr) Error() string {
+	if e.isEmpty {
+		return fmt.Sprintf("%q does not exist, the available options are %q", e.name, strings.Join(e.suggestions, ", "))
+	}
+	return fmt.Sprintf("%q does not exist, did you mean %q", e.name, strings.Join(e.suggestions, ", "))
+}
+
 func set(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -209,56 +222,56 @@ func getFilePath(args ...string) (string, error) {
 
 // deleteDb: delete a Skate database.
 func deleteDb(cmd *cobra.Command, args []string) error {
-	// get client info
-	n, err := nameFromArgs(args)
+	dbs, err := getDbs()
 	if err != nil {
 		return err
 	}
-	path, err := getFilePath(n)
-	if err != nil {
-		return err
+	path, err := findDb(args[0], dbs)
+	if e, ok := err.(dbNotFoundErr); ok {
+		fmt.Println(e.Error())
+		os.Exit(1)
 	}
-	_, err = os.Stat(path)
-	if n == "" || os.IsNotExist(err) {
-		fmt.Println(notFound(args[0]))
-	} else {
-		var confirmation string
-		fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
-		fmt.Scanln(&confirmation)
-		if confirmation == "y" {
-			return os.RemoveAll(path)
-		}
-		fmt.Println("did not delete " + n)
+	var confirmation string
+	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
+	fmt.Scanln(&confirmation)
+	if confirmation == "y" {
+		return os.RemoveAll(path)
 	}
+	fmt.Printf("did not delete %q\n", path)
 	return nil
 }
 
-// notFound: displays a not found message with suggestions.
-func notFound(v string) string {
-	opts, _ := suggest(v)
-	dbs, _ := getDbs()
-	if len(opts) == 0 {
-		return fmt.Sprintf("%s does not exist, the available options are %q", v, strings.Join(dbs, ", "))
-	}
-	return fmt.Sprintf("%s does not exist, did you mean %q", v, strings.Join(opts, ", "))
-}
-
-// suggest: returns valid options based on values similar to input.
-func suggest(name string) ([]string, error) {
-	dbs, err := getDbs()
+// findDb: returns the path to the named db, if found.
+func findDb(name string, dbs []string) (string, error) {
+	sName, err := nameFromArgs([]string{name})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	var suggestions []string
-	for _, db := range dbs {
-		levenshteinDistance := levenshtein.ComputeDistance(name, db)
-		suggestByLevenshtein := levenshteinDistance <= distance
-		suggestByPrefix := strings.HasPrefix(name, db[:distance])
-		if suggestByLevenshtein || suggestByPrefix {
-			suggestions = append(suggestions, db)
+	path, err := getFilePath(sName)
+	if err != nil {
+		return "", err
+	}
+	_, err = os.Stat(path)
+	if os.IsNotExist(err) {
+		dbs, err := getDbs()
+		if err != nil {
+			return "", err
 		}
+		var suggestions []string
+		for _, db := range dbs {
+			levenshteinDistance := levenshtein.ComputeDistance(name, db)
+			suggestByLevenshtein := levenshteinDistance <= distance
+			suggestByPrefix := strings.HasPrefix(name, db[:distance])
+			if suggestByLevenshtein || suggestByPrefix {
+				suggestions = append(suggestions, db)
+			}
+		}
+		if len(suggestions) == 0 {
+			return "", dbNotFoundErr{name: name, suggestions: dbs, isEmpty: true}
+		}
+		return "", dbNotFoundErr{name: name, suggestions: suggestions, isEmpty: false}
 	}
-	return suggestions, nil
+	return path, nil
 }
 
 func list(cmd *cobra.Command, args []string) error {
