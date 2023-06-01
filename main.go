@@ -231,6 +231,10 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
 		os.Exit(1)
 	}
+	if err != nil {
+	  fmt.Printf("unexpected error: %s", err.Error())
+	  os.Exit(1)
+	}
 	var confirmation string
 	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
 	fmt.Scanln(&confirmation)
