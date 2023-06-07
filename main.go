@@ -124,15 +124,15 @@ var (
 	}
 )
 
-type suggestionNotFoundErr struct {
+type errDBNotFound struct {
 	suggestions []string
 }
 
-func (e suggestionNotFoundErr) Error() string {
-	if len(e.suggestions) == 0 {
+func (err errDBNotFound) Error() string {
+	if len(err.suggestions) == 0 {
 		return "no suggestions found"
 	}
-	return fmt.Sprintf("did you mean %q", strings.Join(e.suggestions, ", "))
+	return fmt.Sprintf("did you mean %q", strings.Join(err.suggestions, ", "))
 }
 
 func set(cmd *cobra.Command, args []string) error {
@@ -226,14 +226,14 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	path, err := findDb(args[0], dbs)
-	var notFoundErr suggestionNotFoundErr
-	if errors.As(err, &notFoundErr) {
+	var errNotFound errDBNotFound
+	if errors.As(err, &errNotFound) {
 		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
 		os.Exit(1)
 	}
 	if err != nil {
-	  fmt.Printf("unexpected error: %s", err.Error())
-	  os.Exit(1)
+		fmt.Printf("unexpected error: %s", err.Error())
+		os.Exit(1)
 	}
 	var confirmation string
 	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
@@ -271,7 +271,7 @@ func findDb(name string, dbs []string) (string, error) {
 				suggestions = append(suggestions, db)
 			}
 		}
-		return "", suggestionNotFoundErr{suggestions: suggestions}
+		return "", errDBNotFound{suggestions: suggestions}
 	}
 	return path, nil
 }

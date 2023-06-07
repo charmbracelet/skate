@@ -19,7 +19,7 @@ func TestFindDbs(t *testing.T) {
 		{
 			name: "@spon",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: []string{
 					"@spongebob",
 				},
@@ -28,7 +28,7 @@ func TestFindDbs(t *testing.T) {
 		{
 			name: "@char",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: []string{
 					"@charm.sh.kv.user.default",
 					"@charm.sh.skate.default",
@@ -38,7 +38,7 @@ func TestFindDbs(t *testing.T) {
 		{
 			name: "spon",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: []string{
 					"@spongebob",
 				},
@@ -47,21 +47,21 @@ func TestFindDbs(t *testing.T) {
 		{
 			name: "",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: nil,
 			},
 		},
 		{
 			name: "endo",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: nil,
 			},
 		},
 		{
 			name: "@endo",
 			dbs:  defaultDbs,
-			err: suggestionNotFoundErr{
+			err: errDBNotFound{
 				suggestions: nil,
 			},
 		},
@@ -78,12 +78,12 @@ func TestFindDbs(t *testing.T) {
 			if err == nil {
 				t.Fatalf("expected an error, got: %v", err)
 			}
-			var perr suggestionNotFoundErr
+			var perr errDBNotFound
 			if !errors.As(err, &perr) {
 				t.Fatalf("something went wrong! got: %v", err)
 			}
-			if len(err.(suggestionNotFoundErr).suggestions) !=
-				len(tc.err.(suggestionNotFoundErr).suggestions) {
+			if len(err.(errDBNotFound).suggestions) !=
+				len(tc.err.(errDBNotFound).suggestions) {
 				t.Fatalf("got != want. got: %v, want: %v", err, tc.err)
 			}
 		}
