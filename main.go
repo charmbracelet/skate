@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// distance: an arbitrary number to dictate suggestions
+// distance: an arbitrary number to dictate suggestions.
 const distance = 3
 
 var (
@@ -34,8 +34,7 @@ var (
 	showBinary       bool
 	delimiterIterate string
 
-	warningStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
-	highlightStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5FD2"))
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -187,7 +186,7 @@ func listDbs(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-// getDbs: returns a formatted list of available Skate DBs
+// getDbs: returns a formatted list of available Skate DBs.
 func getDbs() ([]string, error) {
 	filepath, err := getFilePath()
 	if err != nil {
