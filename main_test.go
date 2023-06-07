@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"testing"
+
+	"github.com/charmbracelet/charm/testserver"
 )
 
 func TestFindDbs(t *testing.T) {
@@ -95,20 +96,14 @@ func TestFindDbs(t *testing.T) {
 			if err != nil && tc.err == nil {
 				t.Fatalf("got an unexpected error: %v", err)
 			}
-			if err := teardown(path); err != nil {
-				t.Fatal(err)
-			}
 		})
 	}
 }
 
-// TODO: use local charm server for testing instead of pinging cloud services
 func setup(t *testing.T, dbs []string) string {
-	// set up charm kv temp path for tests
-	dir := os.TempDir()
-	path := fmt.Sprintf("%scharm-tests", dir)
-	t.Setenv("CHARM_DATA_DIR", path)
-	// create the kv dbs
+	// set up a charm server for testing
+	client := testserver.SetupTestServer(t)
+	// add the skate dbs
 	for _, db := range dbs {
 		charmKV, err := openKV(db)
 		if err != nil {
@@ -117,6 +112,10 @@ func setup(t *testing.T, dbs []string) string {
 		if err := charmKV.Close(); err != nil {
 			t.Fatal(err)
 		}
+	}
+	path, err := client.DataPath()
+	if err != nil {
+		t.Fatal(err)
 	}
 	return path
 }
