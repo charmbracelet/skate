@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,9 +21,6 @@ import (
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 )
-
-// distance: an arbitrary number to dictate suggestions.
-const distance = 3
 
 var (
 	Version   = ""
@@ -263,11 +261,10 @@ func findDb(name string, dbs []string) (string, error) {
 		}
 		var suggestions []string
 		for _, db := range dbs {
+			diff := int(math.Abs(float64(len(db) - len(name))))
 			levenshteinDistance := levenshtein.ComputeDistance(name, db)
-			suggestByLevenshtein := levenshteinDistance <= distance
-			suggestByPrefix := strings.HasPrefix(name, db[:distance])
-			suggestByPrefixAlt := strings.HasPrefix("@"+name, db[:distance])
-			if suggestByLevenshtein || suggestByPrefix || suggestByPrefixAlt {
+			suggestByLevenshtein := levenshteinDistance <= diff
+			if suggestByLevenshtein {
 				suggestions = append(suggestions, db)
 			}
 		}

@@ -13,15 +13,18 @@ func TestFindDbs(t *testing.T) {
 		"spongebob",
 		"charm.sh.kv.user.default",
 		"charm.sh.skate.default",
+		"sk",
 	}
 	tests := []struct {
-		name string
-		dbs  []string
-		err  error
+		tname string
+		name  string
+		dbs   []string
+		err   error
 	}{
 		{
-			name: "@spon",
-			dbs:  defaultDbs,
+			tname: "unique, single char",
+			name:  "p",
+			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: []string{
 					"@spongebob",
@@ -29,8 +32,36 @@ func TestFindDbs(t *testing.T) {
 			},
 		},
 		{
-			name: "@char",
-			dbs:  defaultDbs,
+			tname: "name > db",
+			name:  "pcharm.sh.kv.user.defaultcharm.sh.kv.user.default",
+			dbs:   defaultDbs,
+			err: errDBNotFound{
+				suggestions: nil,
+			},
+		},
+
+		{
+			tname: "empty",
+			name:  "",
+			dbs:   defaultDbs,
+			err: errDBNotFound{
+				suggestions: defaultDbs,
+			},
+		},
+		{
+			tname: "single match",
+			name:  "@spon",
+			dbs:   defaultDbs,
+			err: errDBNotFound{
+				suggestions: []string{
+					"@spongebob",
+				},
+			},
+		},
+		{
+			tname: "charm match",
+			name:  "@char",
+			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: []string{
 					"@charm.sh.kv.user.default",
@@ -39,8 +70,9 @@ func TestFindDbs(t *testing.T) {
 			},
 		},
 		{
-			name: "spon",
-			dbs:  defaultDbs,
+			tname: "single match, no @",
+			name:  "spon",
+			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: []string{
 					"@spongebob",
@@ -48,34 +80,30 @@ func TestFindDbs(t *testing.T) {
 			},
 		},
 		{
-			name: "",
-			dbs:  defaultDbs,
+			tname: "no match, no @",
+			name:  "endo",
+			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: nil,
 			},
 		},
 		{
-			name: "endo",
-			dbs:  defaultDbs,
+			tname: "no match",
+			name:  "@endo",
+			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: nil,
 			},
 		},
 		{
-			name: "@endo",
-			dbs:  defaultDbs,
-			err: errDBNotFound{
-				suggestions: nil,
-			},
-		},
-		{
-			name: "@spongebob",
-			dbs:  defaultDbs,
-			err:  nil,
+			tname: "exact match",
+			name:  "@spongebob",
+			dbs:   defaultDbs,
+			err:   nil,
 		},
 	}
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tc.tname, func(t *testing.T) {
 			path := setup(t, tc.dbs)
 			defer teardown(path)
 			_, err := findDb(tc.name, tc.dbs)
