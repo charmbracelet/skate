@@ -244,7 +244,8 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// findDb: returns the path to the named db, if found.
+// findDb: returns the path to the named db or an errDBNotFound if no
+// match is found.
 func findDb(name string, dbs []string) (string, error) {
 	sName, err := nameFromArgs([]string{name})
 	if err != nil {

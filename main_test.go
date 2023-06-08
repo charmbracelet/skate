@@ -89,7 +89,6 @@ func TestFindDbs(t *testing.T) {
 				}
 				if len(err.(errDBNotFound).suggestions) !=
 					len(tc.err.(errDBNotFound).suggestions) {
-
 					t.Fatalf("got != want. got: %v, want: %v", err, tc.err)
 				}
 			}
