@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"os"
+	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/charmbracelet/charm/testserver"
@@ -33,7 +35,7 @@ func TestFindDbs(t *testing.T) {
 		},
 		{
 			tname: "name > db",
-			name:  "pcharm.sh.kv.user.defaultcharm.sh.kv.user.default",
+			name:  "pcharm.sh.kv.user.defaultii",
 			dbs:   defaultDbs,
 			err: errDBNotFound{
 				suggestions: nil,
@@ -45,7 +47,7 @@ func TestFindDbs(t *testing.T) {
 			name:  "",
 			dbs:   defaultDbs,
 			err: errDBNotFound{
-				suggestions: defaultDbs,
+				suggestions: formatDbs(defaultDbs),
 			},
 		},
 		{
@@ -111,12 +113,17 @@ func TestFindDbs(t *testing.T) {
 				if err == nil {
 					t.Fatalf("expected an error, got: %v", err)
 				}
+				// check we got the right type of error
 				var perr errDBNotFound
 				if !errors.As(err, &perr) {
 					t.Fatalf("something went wrong! got: %v", err)
 				}
-				if len(err.(errDBNotFound).suggestions) !=
-					len(tc.err.(errDBNotFound).suggestions) {
+				// check suggestions match
+				gotSuggestions := err.(errDBNotFound).suggestions
+				wantSuggestions := tc.err.(errDBNotFound).suggestions
+				sort.Strings(gotSuggestions)
+				sort.Strings(wantSuggestions)
+				if !reflect.DeepEqual(gotSuggestions, wantSuggestions) {
 					t.Fatalf("got != want. got: %v, want: %v", err, tc.err)
 				}
 			}

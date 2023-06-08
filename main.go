@@ -194,13 +194,21 @@ func getDbs() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var out []string
+	var dbList []string
 	for _, e := range entries {
 		if e.IsDir() {
-			out = append(out, "@"+e.Name())
+			dbList = append(dbList, e.Name())
 		}
 	}
-	return out, nil
+	return formatDbs(dbList), nil
+}
+
+func formatDbs(dbs []string) []string {
+	var out []string
+	for _, db := range dbs {
+		out = append(out, "@"+db)
+	}
+	return out
 }
 
 // getFilePath: get the file path to the skate databases.
