@@ -21,11 +21,10 @@ import (
 
 // styles.
 var (
-	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	keyStyle  = lipgloss.NewStyle().
+	fuchsia  = lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}
+	keyStyle = lipgloss.NewStyle().
 			Align(lipgloss.Left).
-			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(highlight).
+			Foreground(fuchsia).
 			Margin(1, 1, 0, 0).
 			Padding(0, 1)
 	valueStyle = lipgloss.NewStyle().
