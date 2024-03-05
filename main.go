@@ -1,13 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/agnivade/levenshtein"
 	"github.com/charmbracelet/charm/client"
 	"github.com/charmbracelet/charm/cmd"
 	"github.com/charmbracelet/charm/kv"
@@ -29,7 +32,7 @@ var (
 	showBinary       bool
 	delimiterIterate string
 
-	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B"))
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -118,6 +121,17 @@ var (
 	}
 )
 
+type errDBNotFound struct {
+	suggestions []string
+}
+
+func (err errDBNotFound) Error() string {
+	if len(err.suggestions) == 0 {
+		return "no suggestions found"
+	}
+	return fmt.Sprintf("did you mean %q", strings.Join(err.suggestions, ", "))
+}
+
 func set(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -163,65 +177,108 @@ func delete(cmd *cobra.Command, args []string) error {
 }
 
 func listDbs(cmd *cobra.Command, args []string) error {
+	dbs, err := getDbs()
+	for _, db := range dbs {
+		fmt.Println(db)
+	}
+	return err
+}
+
+// getDbs: returns a formatted list of available Skate DBs.
+func getDbs() ([]string, error) {
+	filepath, err := getFilePath()
+	if err != nil {
+		return nil, err
+	}
+	entries, err := os.ReadDir(filepath)
+	if err != nil {
+		return nil, err
+	}
+	var dbList []string
+	for _, e := range entries {
+		if e.IsDir() {
+			dbList = append(dbList, e.Name())
+		}
+	}
+	return formatDbs(dbList), nil
+}
+
+func formatDbs(dbs []string) []string {
+	var out []string
+	for _, db := range dbs {
+		out = append(out, "@"+db)
+	}
+	return out
+}
+
+// getFilePath: get the file path to the skate databases.
+func getFilePath(args ...string) (string, error) {
 	cc, err := client.NewClientWithDefaults()
 	if err != nil {
-		return err
+		return "", err
 	}
 	dd, err := cc.DataPath()
 	if err != nil {
-		return err
+		return "", err
 	}
-	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
+	return filepath.Join(append([]string{dd, "kv"}, args...)...), err
+}
+
+// deleteDb: delete a Skate database.
+func deleteDb(cmd *cobra.Command, args []string) error {
+	dbs, err := getDbs()
 	if err != nil {
 		return err
 	}
-	for _, d := range dbs {
-		if d.IsDir() {
-			fmt.Println("@" + d.Name())
-		}
+	path, err := findDb(args[0], dbs)
+	var errNotFound errDBNotFound
+	if errors.As(err, &errNotFound) {
+		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
+		os.Exit(1)
 	}
+	if err != nil {
+		fmt.Printf("unexpected error: %s", err.Error())
+		os.Exit(1)
+	}
+	var confirmation string
+	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
+	fmt.Scanln(&confirmation)
+	if confirmation == "y" {
+		return os.RemoveAll(path)
+	}
+	fmt.Printf("did not delete %q\n", path)
 	return nil
 }
 
-func deleteDb(cmd *cobra.Command, args []string) error {
-	n, err := nameFromArgs(args)
+// findDb: returns the path to the named db or an errDBNotFound if no
+// match is found.
+func findDb(name string, dbs []string) (string, error) {
+	sName, err := nameFromArgs([]string{name})
 	if err != nil {
-		return err
+		return "", err
 	}
-	cc, err := client.NewClientWithDefaults()
+	path, err := getFilePath(sName)
 	if err != nil {
-		return err
+		return "", err
 	}
-	dd, err := cc.DataPath()
-	if err != nil {
-		return err
-	}
-	dbs, err := os.ReadDir(filepath.Join(dd, "kv"))
-	if err != nil {
-		return err
-	}
-
-	var found bool
-	for _, d := range dbs {
-		if d.IsDir() && d.Name() == n {
-			found = true
-			var confirmation string
-			fmt.Println(warningStyle.Render("are you sure you want to delete " + d.Name() + " and all its contents? (y/n)"))
-			fmt.Scanln(&confirmation)
-			if confirmation == "y" {
-				err := os.RemoveAll(filepath.Join(dd, "kv", d.Name()))
-				if err != nil {
-					return err
-				}
-			} else {
-				fmt.Println("did not delete " + d.Name())
+	_, err = os.Stat(path)
+	if sName == "" || os.IsNotExist(err) {
+		dbs, err := getDbs()
+		if err != nil {
+			return "", err
+		}
+		var suggestions []string
+		for _, db := range dbs {
+			diff := int(math.Abs(float64(len(db) - len(name))))
+			levenshteinDistance := levenshtein.ComputeDistance(name, db)
+			suggestByLevenshtein := levenshteinDistance <= diff
+			if suggestByLevenshtein {
+				suggestions = append(suggestions, db)
 			}
 		}
+		return "", errDBNotFound{suggestions: suggestions}
 	}
-	if !found {
-		fmt.Println(args[0] + " does not exist")
-	}
-	return nil
+	return path, nil
 }
 
 func list(cmd *cobra.Command, args []string) error {
