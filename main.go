@@ -239,11 +239,11 @@ func deleteDb(_ *cobra.Command, args []string) error {
 	path, err := findDb(args[0])
 	var errNotFound errDBNotFound
 	if errors.As(err, &errNotFound) {
-		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
+		fmt.Fprintf(os.Stderr, "%q does not exist, %s\n", args[0], err.Error())
 		os.Exit(1)
 	}
 	if err != nil {
-		fmt.Printf("unexpected error: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "unexpected error: %s", err.Error())
 		os.Exit(1)
 	}
 	var confirmation string
@@ -255,7 +255,7 @@ func deleteDb(_ *cobra.Command, args []string) error {
 	if confirmation == "y" {
 		return os.RemoveAll(path)
 	}
-	fmt.Printf("did not delete %q\n", path)
+	fmt.Fprintf(os.Stderr, "did not delete %q\n", path)
 	return nil
 }
 
@@ -431,7 +431,7 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 }
