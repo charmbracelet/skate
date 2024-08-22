@@ -22,7 +22,10 @@ import (
 )
 
 var (
-	Version   = ""
+	// Version set by goreleaser.
+	Version = ""
+
+	// CommitSHA set by goreleaser.
 	CommitSHA = ""
 
 	reverseIterate   bool
@@ -37,7 +40,7 @@ var (
 		Use:   "skate",
 		Short: "Skate, a personal key value store.",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}
@@ -62,7 +65,7 @@ var (
 		Use:   "delete KEY[@DB]",
 		Short: "Delete a key with an optional @ db.",
 		Args:  cobra.ExactArgs(1),
-		RunE:  delete,
+		RunE:  del,
 	}
 
 	listCmd = &cobra.Command{
@@ -92,7 +95,7 @@ var (
 		Short:  "Generate man pages",
 		Args:   cobra.NoArgs,
 		Hidden: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(*cobra.Command, []string) error {
 			manPage, err := mcobra.NewManPage(1, rootCmd) //.
 			if err != nil {
 				return err
@@ -125,7 +128,7 @@ func set(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.Close() //nolint:errcheck
 	if len(args) == 2 {
 		return wrap(db, false, func(tx *badger.Txn) error {
 			return tx.Set(k, []byte(args[1]))
@@ -140,7 +143,7 @@ func set(cmd *cobra.Command, args []string) error {
 	})
 }
 
-func get(cmd *cobra.Command, args []string) error {
+func get(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -149,7 +152,7 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.Close() //nolint:errcheck
 	var v []byte
 	if err := wrap(db, true, func(tx *badger.Txn) error {
 		item, err := tx.Get(k)
@@ -165,7 +168,7 @@ func get(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func delete(cmd *cobra.Command, args []string) error {
+func del(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -174,14 +177,14 @@ func delete(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.Close() //nolint:errcheck
 
 	return wrap(db, false, func(tx *badger.Txn) error {
 		return tx.Delete(k)
 	})
 }
 
-func listDbs(cmd *cobra.Command, args []string) error {
+func listDbs(*cobra.Command, []string) error {
 	dbs, err := getDbs()
 	for _, db := range dbs {
 		fmt.Println(db)
@@ -209,7 +212,7 @@ func getDbs() ([]string, error) {
 }
 
 func formatDbs(dbs []string) []string {
-	var out []string
+	out := make([]string, 0, len(dbs))
 	for _, db := range dbs {
 		out = append(out, "@"+db)
 	}
@@ -231,7 +234,7 @@ func getFilePath(args ...string) (string, error) {
 }
 
 // deleteDb: delete a Skate database.
-func deleteDb(cmd *cobra.Command, args []string) error {
+func deleteDb(_ *cobra.Command, args []string) error {
 	path, err := findDb(args[0])
 	var errNotFound errDBNotFound
 	if errors.As(err, &errNotFound) {
@@ -244,7 +247,10 @@ func deleteDb(cmd *cobra.Command, args []string) error {
 	}
 	var confirmation string
 	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
-	fmt.Scanln(&confirmation)
+	// TODO: use huh
+	if _, err := fmt.Scanln(&confirmation); err != nil {
+		return err
+	}
 	if confirmation == "y" {
 		return os.RemoveAll(path)
 	}
@@ -283,7 +289,7 @@ func findDb(name string) (string, error) {
 	return path, nil
 }
 
-func list(cmd *cobra.Command, args []string) error {
+func list(_ *cobra.Command, args []string) error {
 	var k string
 	var pf string
 	if keysIterate || valuesIterate {
@@ -318,7 +324,7 @@ func list(cmd *cobra.Command, args []string) error {
 			opts.PrefetchValues = false
 		}
 		it := txn.NewIterator(opts)
-		defer it.Close()
+		defer it.Close() //nolint:errcheck
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
@@ -435,5 +441,5 @@ func wrap(db *badger.DB, readonly bool, fn func(tx *badger.Txn) error) error {
 		tx.Discard()
 		return err
 	}
-	return tx.Commit()
+	return tx.Commit() //nolint:wrapcheck
 }
