@@ -223,15 +223,15 @@ func formatDbs(dbs []string) []string {
 // getFilePath: get the file path to the skate databases.
 func getFilePath(args ...string) (string, error) {
 	scope := gap.NewScope(gap.User, "charm")
-	dd, err := scope.DataPath("")
-	if err != nil {
-		return "", err
+	dd, pathErr := scope.DataPath("")
+	if pathErr != nil {
+		return "", pathErr
 	}
 	dir := filepath.Join(dd, "kv")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
 	}
-	return filepath.Join(append([]string{dir}, args...)...), err
+	return filepath.Join(append([]string{dir}, args...)...), nil
 }
 
 // deleteDb: delete a Skate database.
