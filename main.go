@@ -184,6 +184,7 @@ func del(_ *cobra.Command, args []string) error {
 	})
 }
 
+// TODO: use lists/tables/trees for this?
 func listDbs(*cobra.Command, []string) error {
 	dbs, err := getDbs()
 	for _, db := range dbs {
