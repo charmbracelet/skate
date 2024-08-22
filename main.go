@@ -34,7 +34,7 @@ var (
 	showBinary       bool
 	delimiterIterate string
 
-	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Bold(true)
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
@@ -247,7 +247,15 @@ func deleteDb(_ *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 	var confirmation string
-	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
+
+	home, err := os.UserHomeDir()
+	if err == nil && strings.HasPrefix(path, home) {
+		path = filepath.Join("~", strings.TrimPrefix(path, home))
+	}
+	message := fmt.Sprintf("Are you sure you want to delete '%s' and all its contents? (y/n)", warningStyle.Render(path))
+	message = lipgloss.NewStyle().Width(78).Render(message)
+	fmt.Println(message)
+
 	// TODO: use huh
 	if _, err := fmt.Scanln(&confirmation); err != nil {
 		return err
@@ -255,7 +263,7 @@ func deleteDb(_ *cobra.Command, args []string) error {
 	if confirmation == "y" {
 		return os.RemoveAll(path)
 	}
-	fmt.Fprintf(os.Stderr, "did not delete %q\n", path)
+	fmt.Fprintf(os.Stderr, "Did not delete %q\n", path)
 	return nil
 }
 
