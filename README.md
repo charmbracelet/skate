@@ -9,8 +9,7 @@
 A personal key-value store. 🛼
 
 Skate is simple and powerful. Use it to save and retrieve anything you’d
-like—even binary data. It’s fully encrypted, backed up to the cloud (that you
-can self-host if you want) and can be synced with all your machines.
+like—even binary data.
 
 ```bash
 # Store something (and sync it to the network)
@@ -21,9 +20,6 @@ skate get kitty
 
 # What’s in the store?
 skate list
-
-# Pull down the latest data
-skate sync
 
 # Spaces are fine
 skate set "kitty litter" "smells great"
@@ -79,8 +75,8 @@ sudo yum install skate
 
 Or download it:
 
-* [Packages][releases] are available in Debian and RPM formats
-* [Binaries][releases] are available for Linux, macOS, and Windows
+- [Packages][releases] are available in Debian and RPM formats
+- [Binaries][releases] are available for Linux, macOS, and Windows
 
 Or just install it with `go`:
 
@@ -93,6 +89,7 @@ go install github.com/charmbracelet/skate@latest
 ## Other Features
 
 ### List Filters
+
 ```bash
 # list keys only
 skate list -k
@@ -125,29 +122,7 @@ skate list @work-stuff
 
 # Wait, what was that db named?
 skate list-dbs
-
-# Oh no, the boss is coming!
-skate reset @work-stuff
 ```
-
-### Linking
-
-One of the most powerful features of Skate is its ability to link two machines
-together so they have access to the same data. To link two machines together
-just run:
-
-```bash
-skate link
-```
-
-And follow the instructions. Keep in mind that you'll need access to both
-machines.
-
-### Syncing
-
-When you run `skate set`, data is encrypted and synced to the network. When
-you `get`, however, data is loaded from the local cache. To fetch any new data
-from the server just run `skate sync`.
 
 ## Examples
 
@@ -181,48 +156,19 @@ skate list @bookmarks.db
 
 What do you use `skate` for? [Let us know](mailto:vt100@charm.sh).
 
-## Self-Hosting
-
-Skate is backed by the Charm Cloud. By default, it will use the Charm hosted
-cloud, but it’s incredibly easy to self-host, even if that’s just on your
-local network. For details, see the [Charm docs][selfhost].
-
-[selfhost]: https://github.com/charmbracelet/charm#self-hosting
-
-If you've finished setting up your very own Charm Cloud, great.
-To make `skate` connect to your self-hosted instance, you'll need to change the
-`CHARM_HOST` environment variable to point to the domain/IP of where you hosted
-your Charm Cloud. If you would like to change anything else about the Skate
-client, you can do so by changing the Charm client [environment
-variables][client-vars].
-
-[client-vars]: https://github.com/charmbracelet/charm#client-settings
-
-## Hey, Developers
-
-Skate is built on [Charm KV][charm-kv]. If you’d like to build a tool that
-includes a user key value store, check it out. Skate has the same functionality
-as `charm kv`, but it uses a separate database.
-
-If you have questions about the underlying file system Skate uses, head on over
-to our [Charm FS FAQ][faq].
-
-[charm-kv]: https://github.com/charmbracelet/charm#charm-kv
-[faq]: https://github.com/charmbracelet/charm#faq
-
 ## Feedback
 
 We’d love to hear your thoughts on this project. Feel free to drop us a note!
 
-* [Twitter](https://twitter.com/charmcli)
-* [The Fediverse](https://mastodon.social/@charmcli)
-* [Discord](https://charm.sh/chat)
+- [Twitter](https://twitter.com/charmcli)
+- [The Fediverse](https://mastodon.social/@charmcli)
+- [Discord](https://charm.sh/chat)
 
 ## License
 
 [MIT](https://github.com/charmbracelet/skate/raw/main/LICENSE)
 
-***
+---
 
 Part of [Charm](https://charm.sh).
 

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -11,19 +12,20 @@ import (
 	"unicode/utf8"
 
 	"github.com/agnivade/levenshtein"
-	"github.com/charmbracelet/charm/client"
-	"github.com/charmbracelet/charm/cmd"
-	"github.com/charmbracelet/charm/kv"
-	"github.com/charmbracelet/charm/ui/common"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v4"
+	gap "github.com/muesli/go-app-paths"
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var (
-	Version   = ""
+	// Version set by goreleaser.
+	Version = ""
+
+	// CommitSHA set by goreleaser.
 	CommitSHA = ""
 
 	reverseIterate   bool
@@ -32,13 +34,13 @@ var (
 	showBinary       bool
 	delimiterIterate string
 
-	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FD5B5B")).Italic(true)
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Bold(true)
 
 	rootCmd = &cobra.Command{
 		Use:   "skate",
 		Short: "Skate, a personal key value store.",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}
@@ -63,7 +65,7 @@ var (
 		Use:   "delete KEY[@DB]",
 		Short: "Delete a key with an optional @ db.",
 		Args:  cobra.ExactArgs(1),
-		RunE:  delete,
+		RunE:  del,
 	}
 
 	listCmd = &cobra.Command{
@@ -88,32 +90,17 @@ var (
 		RunE:   deleteDb,
 	}
 
-	syncCmd = &cobra.Command{
-		Use:   "sync [@DB]",
-		Short: "Sync local db with latest Charm Cloud db.",
-		Args:  cobra.MaximumNArgs(1),
-		RunE:  sync,
-	}
-
-	resetCmd = &cobra.Command{
-		Use:   "reset [@DB]",
-		Short: "Delete local db and pull down fresh copy from Charm Cloud.",
-		Args:  cobra.MaximumNArgs(1),
-		RunE:  reset,
-	}
-
 	manCmd = &cobra.Command{
 		Use:    "man",
 		Short:  "Generate man pages",
 		Args:   cobra.NoArgs,
 		Hidden: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(*cobra.Command, []string) error {
 			manPage, err := mcobra.NewManPage(1, rootCmd) //.
 			if err != nil {
 				return err
 			}
-
-			manPage = manPage.WithSection("Copyright", "(C) 2021-2022 Charmbracelet, Inc.\n"+
+			manPage = manPage.WithSection("Copyright", "(C) 2021-2024 Charmbracelet, Inc.\n"+
 				"Released under MIT license.")
 			fmt.Println(manPage.Build(roff.NewDocument()))
 			return nil
@@ -141,13 +128,22 @@ func set(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close() //nolint:errcheck
 	if len(args) == 2 {
-		return db.Set(k, []byte(args[1]))
+		return wrap(db, false, func(tx *badger.Txn) error {
+			return tx.Set(k, []byte(args[1]))
+		})
 	}
-	return db.SetReader(k, os.Stdin)
+	bts, err := io.ReadAll(cmd.InOrStdin())
+	if err != nil {
+		return err
+	}
+	return wrap(db, false, func(tx *badger.Txn) error {
+		return tx.Set(k, bts)
+	})
 }
 
-func get(cmd *cobra.Command, args []string) error {
+func get(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -156,15 +152,23 @@ func get(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	v, err := db.Get(k)
-	if err != nil {
+	defer db.Close() //nolint:errcheck
+	var v []byte
+	if err := wrap(db, true, func(tx *badger.Txn) error {
+		item, err := tx.Get(k)
+		if err != nil {
+			return err
+		}
+		v, err = item.ValueCopy(nil)
+		return err
+	}); err != nil {
 		return err
 	}
 	printFromKV("%s", v)
 	return nil
 }
 
-func delete(cmd *cobra.Command, args []string) error {
+func del(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
 		return err
@@ -173,10 +177,15 @@ func delete(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	return db.Delete(k)
+	defer db.Close() //nolint:errcheck
+
+	return wrap(db, false, func(tx *badger.Txn) error {
+		return tx.Delete(k)
+	})
 }
 
-func listDbs(cmd *cobra.Command, args []string) error {
+// TODO: use lists/tables/trees for this?
+func listDbs(*cobra.Command, []string) error {
 	dbs, err := getDbs()
 	for _, db := range dbs {
 		fmt.Println(db)
@@ -204,7 +213,7 @@ func getDbs() ([]string, error) {
 }
 
 func formatDbs(dbs []string) []string {
-	var out []string
+	out := make([]string, 0, len(dbs))
 	for _, db := range dbs {
 		out = append(out, "@"+db)
 	}
@@ -213,46 +222,54 @@ func formatDbs(dbs []string) []string {
 
 // getFilePath: get the file path to the skate databases.
 func getFilePath(args ...string) (string, error) {
-	cc, err := client.NewClientWithDefaults()
-	if err != nil {
+	scope := gap.NewScope(gap.User, "charm")
+	dd, pathErr := scope.DataPath("")
+	if pathErr != nil {
+		return "", pathErr
+	}
+	dir := filepath.Join(dd, "kv")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
 	}
-	dd, err := cc.DataPath()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(append([]string{dd, "kv"}, args...)...), err
+	return filepath.Join(append([]string{dir}, args...)...), nil
 }
 
 // deleteDb: delete a Skate database.
-func deleteDb(cmd *cobra.Command, args []string) error {
-	dbs, err := getDbs()
-	if err != nil {
-		return err
-	}
-	path, err := findDb(args[0], dbs)
+func deleteDb(_ *cobra.Command, args []string) error {
+	path, err := findDb(args[0])
 	var errNotFound errDBNotFound
 	if errors.As(err, &errNotFound) {
-		fmt.Printf("%q does not exist, %s\n", args[0], err.Error())
+		fmt.Fprintf(os.Stderr, "%q does not exist, %s\n", args[0], err.Error())
 		os.Exit(1)
 	}
 	if err != nil {
-		fmt.Printf("unexpected error: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "unexpected error: %s", err.Error())
 		os.Exit(1)
 	}
 	var confirmation string
-	fmt.Printf("are you sure you want to delete '%s' and all its contents?(y/n) ", warningStyle.Render(path))
-	fmt.Scanln(&confirmation)
+
+	home, err := os.UserHomeDir()
+	if err == nil && strings.HasPrefix(path, home) {
+		path = filepath.Join("~", strings.TrimPrefix(path, home))
+	}
+	message := fmt.Sprintf("Are you sure you want to delete '%s' and all its contents? (y/n)", warningStyle.Render(path))
+	message = lipgloss.NewStyle().Width(78).Render(message)
+	fmt.Println(message)
+
+	// TODO: use huh
+	if _, err := fmt.Scanln(&confirmation); err != nil {
+		return err
+	}
 	if confirmation == "y" {
 		return os.RemoveAll(path)
 	}
-	fmt.Printf("did not delete %q\n", path)
+	fmt.Fprintf(os.Stderr, "Did not delete %q\n", path)
 	return nil
 }
 
 // findDb: returns the path to the named db or an errDBNotFound if no
 // match is found.
-func findDb(name string, dbs []string) (string, error) {
+func findDb(name string) (string, error) {
 	sName, err := nameFromArgs([]string{name})
 	if err != nil {
 		return "", err
@@ -281,7 +298,7 @@ func findDb(name string, dbs []string) (string, error) {
 	return path, nil
 }
 
-func list(cmd *cobra.Command, args []string) error {
+func list(_ *cobra.Command, args []string) error {
 	var k string
 	var pf string
 	if keysIterate || valuesIterate {
@@ -316,7 +333,7 @@ func list(cmd *cobra.Command, args []string) error {
 			opts.PrefetchValues = false
 		}
 		it := txn.NewIterator(opts)
-		defer it.Close()
+		defer it.Close() //nolint:errcheck
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
@@ -340,30 +357,6 @@ func list(cmd *cobra.Command, args []string) error {
 	})
 }
 
-func sync(cmd *cobra.Command, args []string) error {
-	n, err := nameFromArgs(args)
-	if err != nil {
-		return err
-	}
-	db, err := openKV(n)
-	if err != nil {
-		return err
-	}
-	return db.Sync()
-}
-
-func reset(cmd *cobra.Command, args []string) error {
-	n, err := nameFromArgs(args)
-	if err != nil {
-		return err
-	}
-	db, err := openKV(n)
-	if err != nil {
-		return err
-	}
-	return db.Reset()
-}
-
 func nameFromArgs(args []string) (string, error) {
 	if len(args) == 0 {
 		return "", nil
@@ -378,15 +371,16 @@ func nameFromArgs(args []string) (string, error) {
 func printFromKV(pf string, vs ...[]byte) {
 	nb := "(omitted binary data)"
 	fvs := make([]interface{}, 0)
+	isatty := term.IsTerminal(int(os.Stdin.Fd()))
 	for _, v := range vs {
-		if common.IsTTY() && !showBinary && !utf8.Valid(v) {
+		if isatty && !showBinary && !utf8.Valid(v) {
 			fvs = append(fvs, nb)
 		} else {
 			fvs = append(fvs, string(v))
 		}
 	}
 	fmt.Printf(pf, fvs...)
-	if common.IsTTY() && !strings.HasSuffix(pf, "\n") {
+	if isatty && !strings.HasSuffix(pf, "\n") {
 		fmt.Println()
 	}
 }
@@ -406,11 +400,15 @@ func keyParser(k string) ([]byte, string, error) {
 	return []byte(key), db, nil
 }
 
-func openKV(name string) (*kv.KV, error) {
+func openKV(name string) (*badger.DB, error) {
 	if name == "" {
-		name = "charm.sh.skate.default"
+		name = "default"
 	}
-	return kv.OpenWithDefaults(name)
+	path, err := getFilePath(name)
+	if err != nil {
+		return nil, err
+	}
+	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR))
 }
 
 func init() {
@@ -438,16 +436,22 @@ func init() {
 		listCmd,
 		listDbsCmd,
 		deleteDbCmd,
-		syncCmd,
-		resetCmd,
-		cmd.LinkCmd("skate"),
 		manCmd,
 	)
 }
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func wrap(db *badger.DB, readonly bool, fn func(tx *badger.Txn) error) error {
+	tx := db.NewTransaction(!readonly)
+	if err := fn(tx); err != nil {
+		tx.Discard()
+		return err
+	}
+	return tx.Commit() //nolint:wrapcheck
 }
