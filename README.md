@@ -122,9 +122,6 @@ skate list @work-stuff
 
 # Wait, what was that db named?
 skate list-dbs
-
-# Oh no, the boss is coming!
-skate reset @work-stuff
 ```
 
 ## Examples
