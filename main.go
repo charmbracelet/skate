@@ -401,6 +401,9 @@ func keyParser(k string) ([]byte, string, error) {
 }
 
 func openKV(name string) (*badger.DB, error) {
+	if name == "" {
+		name = "charm.sh.skate.default"
+	}
 	path, err := getFilePath(name)
 	if err != nil {
 		return nil, err
