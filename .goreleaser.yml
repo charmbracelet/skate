@@ -4,7 +4,7 @@ version: 2
 
 includes:
   - from_url:
-      url: charmbracelet/meta/main/goreleaser-semi.yaml
+      url: charmbracelet/meta/main/goreleaser-simple.yaml
 
 variables:
   binary_name: skate
