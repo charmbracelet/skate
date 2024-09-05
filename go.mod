@@ -10,7 +10,7 @@ require (
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/term v0.23.0
+	golang.org/x/term v0.24.0
 )
 
 require (
@@ -41,6 +41,6 @@ require (
 	github.com/stretchr/testify v1.8.3 // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
