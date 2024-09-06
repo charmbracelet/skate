@@ -16,7 +16,6 @@ linters:
   enable:
     - bodyclose
     - dupl
-    - exportloopref
     - goconst
     - godot
     - goimports

@@ -371,7 +371,7 @@ func nameFromArgs(args []string) (string, error) {
 func printFromKV(pf string, vs ...[]byte) {
 	nb := "(omitted binary data)"
 	fvs := make([]interface{}, 0)
-	isatty := term.IsTerminal(int(os.Stdin.Fd()))
+	isatty := term.IsTerminal(int(os.Stdin.Fd())) //nolint: gosec
 	for _, v := range vs {
 		if isatty && !showBinary && !utf8.Valid(v) {
 			fvs = append(fvs, nb)
