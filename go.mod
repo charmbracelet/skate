@@ -42,5 +42,5 @@ require (
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
