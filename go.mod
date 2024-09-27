@@ -3,7 +3,7 @@ module github.com/charmbracelet/skate
 go 1.21
 
 require (
-	github.com/agnivade/levenshtein v1.1.1
+	github.com/agnivade/levenshtein v1.2.0
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/dgraph-io/badger/v4 v4.3.0
 	github.com/muesli/go-app-paths v0.2.2
