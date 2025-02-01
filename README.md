@@ -9,7 +9,7 @@
 A personal key-value store. 🛼
 
 ***
-⚠️ As of v1.0.0 Skate operates locally and no longer syncs to the Charm Cloud. [Read more about why][sunset] and see [the v1.0.0 release notes](https://github.com/charmbracelet/skate/releases/tag/v1.0.0) for a miration guide. The Charm Cloud [sunsets][sunset] on 29 November 2024.
+⚠️ As of v1.0.0 Skate operates locally and no longer syncs to the Charm Cloud. [Read more about why][sunset] and see [the v1.0.0 release notes](https://github.com/charmbracelet/skate/releases/tag/v1.0.0) for a migration guide. The Charm Cloud [sunsets][sunset] on 29 November 2024.
 
 [sunset]: https://github.com/charmbracelet/charm?tab=readme-ov-file#sunsetting-charm-cloud
 ***
