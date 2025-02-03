@@ -46,10 +46,11 @@ var (
 	}
 
 	setCmd = &cobra.Command{
-		Use:   "set KEY[@DB] [VALUE]",
-		Short: "Set a value for a key with an optional @ db. If VALUE is omitted, read value from the standard input.",
-		Args:  cobra.RangeArgs(1, 2),
-		RunE:  set,
+		Use:     "set KEY[@DB] [VALUE]",
+		Short:   "Set a value for a key with an optional @ db. If VALUE is omitted, read value from the standard input.",
+		Example: "  skate set foo bar\n  skate set foo <./bar.txt",
+		Args:    cobra.RangeArgs(1, 2),
+		RunE:    set,
 	}
 
 	getCmd = &cobra.Command{
