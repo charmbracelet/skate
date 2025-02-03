@@ -46,8 +46,8 @@ var (
 	}
 
 	setCmd = &cobra.Command{
-		Use:   "set KEY[@DB] VALUE",
-		Short: "Set a value for a key with an optional @ db.",
+		Use:   "set KEY[@DB] [VALUE]",
+		Short: "Set a value for a key with an optional @ db. If VALUE is omitted, read value from the standard input.",
 		Args:  cobra.RangeArgs(1, 2),
 		RunE:  set,
 	}
