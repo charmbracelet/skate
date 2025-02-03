@@ -249,10 +249,11 @@ func deleteDb(_ *cobra.Command, args []string) error {
 	var confirmation string
 
 	home, err := os.UserHomeDir()
+	showpath := path
 	if err == nil && strings.HasPrefix(path, home) {
-		path = filepath.Join("~", strings.TrimPrefix(path, home))
+		showpath = filepath.Join("~", strings.TrimPrefix(showpath, home))
 	}
-	message := fmt.Sprintf("Are you sure you want to delete '%s' and all its contents? (y/n)", warningStyle.Render(path))
+	message := fmt.Sprintf("Are you sure you want to delete '%s' and all its contents? (y/n)", warningStyle.Render(showpath))
 	message = lipgloss.NewStyle().Width(78).Render(message)
 	fmt.Println(message)
 
@@ -261,9 +262,13 @@ func deleteDb(_ *cobra.Command, args []string) error {
 		return err
 	}
 	if confirmation == "y" {
-		return os.RemoveAll(path)
+		if err := os.RemoveAll(path); err != nil {
+			return err
+		}
+		fmt.Fprintf(os.Stderr, "Deleted %q\n", showpath)
+		return nil
 	}
-	fmt.Fprintf(os.Stderr, "Did not delete %q\n", path)
+	fmt.Fprintf(os.Stderr, "Did not delete %q\n", showpath)
 	return nil
 }
 
