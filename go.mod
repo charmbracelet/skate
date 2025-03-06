@@ -1,6 +1,7 @@
 module github.com/charmbracelet/skate
 
 go 1.21
+toolchain go1.23.7
 
 require (
 	github.com/agnivade/levenshtein v1.2.1
@@ -10,7 +11,7 @@ require (
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/spf13/cobra v1.9.1
-	golang.org/x/term v0.29.0
+	golang.org/x/term v0.30.0
 )
 
 require (
@@ -36,6 +37,6 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 )
