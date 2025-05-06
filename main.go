@@ -417,6 +417,75 @@ func openKV(name string) (*badger.DB, error) {
 	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR))
 }
 
+func completeDB(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	prefix := strings.TrimPrefix(strings.ToLower(toComplete), "@")
+	dbs, _ := getDbs()
+
+	out := make([]string, 0, len(dbs))
+	for _, db := range dbs {
+		if strings.HasPrefix(strings.TrimPrefix(db, "@"), prefix) {
+			out = append(out, db)
+		}
+	}
+	return out, cobra.ShellCompDirectiveNoFileComp
+}
+
+const maxSuggestions = 200
+
+func completeKeyAllDBs(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	keyPrefix, dbFilter := splitKeyAndDB(toComplete)
+
+	dbs, _ := getDbs()
+	if dbFilter != "" {
+		filtered := dbs[:0]
+		for _, d := range dbs {
+			if strings.HasPrefix(strings.TrimPrefix(d, "@"), dbFilter) {
+				filtered = append(filtered, d)
+			}
+		}
+		dbs = filtered
+	}
+
+	var candidates []string
+	for _, dbEntry := range dbs {
+		dbName := strings.TrimPrefix(dbEntry, "@")
+		kv, err := openKV(dbName)
+		if err != nil {
+			continue // silently ignore unreadable DBs
+		}
+
+		_ = kv.View(func(txn *badger.Txn) error {
+			opts := badger.DefaultIteratorOptions
+			opts.Prefix = []byte(keyPrefix)
+			opts.PrefetchValues = false
+
+			it := txn.NewIterator(opts)
+			defer it.Close()
+
+			for it.Rewind(); it.Valid() && len(candidates) < maxSuggestions; it.Next() {
+				k := it.Item().Key()
+				candidates = append(candidates, fmt.Sprintf("%s@%s", k, dbName))
+			}
+			return nil
+		})
+		kv.Close()
+
+		if len(candidates) >= maxSuggestions {
+			break
+		}
+	}
+	return candidates, cobra.ShellCompDirectiveNoFileComp
+}
+
+func splitKeyAndDB(s string) (keyPref, dbPref string) {
+	parts := strings.SplitN(strings.ToLower(s), "@", 2)
+	keyPref = parts[0]
+	if len(parts) == 2 {
+		dbPref = parts[1]
+	}
+	return
+}
+
 func init() {
 	if len(CommitSHA) >= 7 {
 		vt := rootCmd.VersionTemplate()
@@ -444,6 +513,12 @@ func init() {
 		deleteDbCmd,
 		manCmd,
 	)
+
+	// Autocomplete with databases and keys
+	listCmd.ValidArgsFunction = completeDB
+	deleteDbCmd.ValidArgsFunction = completeDB
+	getCmd.ValidArgsFunction = completeKeyAllDBs
+	deleteCmd.ValidArgsFunction = completeKeyAllDBs
 }
 
 func main() {
