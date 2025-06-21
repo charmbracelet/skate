@@ -63,32 +63,36 @@ var (
 	}
 
 	deleteCmd = &cobra.Command{
-		Use:   "delete KEY[@DB]",
-		Short: "Delete a key with an optional @ db.",
-		Args:  cobra.ExactArgs(1),
-		RunE:  del,
+		Use:     "delete KEY[@DB]",
+		Short:   "Delete a key with an optional @ db.",
+		Aliases: []string{"del", "rm"},
+		Args:    cobra.ExactArgs(1),
+		RunE:    del,
 	}
 
 	listCmd = &cobra.Command{
-		Use:   "list [@DB]",
-		Short: "List key value pairs with an optional @ db.",
-		Args:  cobra.MaximumNArgs(1),
-		RunE:  list,
+		Use:     "list [@DB]",
+		Short:   "List key value pairs with an optional @ db.",
+		Aliases: []string{"ls"},
+		Args:    cobra.MaximumNArgs(1),
+		RunE:    list,
 	}
 
 	listDbsCmd = &cobra.Command{
-		Use:   "list-dbs",
-		Short: "List databases.",
-		Args:  cobra.NoArgs,
-		RunE:  listDbs,
+		Use:     "list-dbs",
+		Short:   "List databases.",
+		Aliases: []string{"ls-db"},
+		Args:    cobra.NoArgs,
+		RunE:    listDbs,
 	}
 
 	deleteDbCmd = &cobra.Command{
-		Use:    "delete-db [@DB]",
-		Hidden: false,
-		Short:  "Delete a database",
-		Args:   cobra.MinimumNArgs(1),
-		RunE:   deleteDb,
+		Use:     "delete-db [@DB]",
+		Hidden:  false,
+		Short:   "Delete a database",
+		Aliases: []string{"del-db", "rm-db"},
+		Args:    cobra.MinimumNArgs(1),
+		RunE:    deleteDb,
 	}
 
 	manCmd = &cobra.Command{
