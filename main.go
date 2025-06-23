@@ -1,3 +1,4 @@
+// Package main provides the skate CLI.
 package main
 
 import (
@@ -124,6 +125,7 @@ func (err errDBNotFound) Error() string {
 	return fmt.Sprintf("did you mean %q", strings.Join(err.suggestions, ", "))
 }
 
+//nolint:wrapcheck
 func set(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -148,6 +150,7 @@ func set(cmd *cobra.Command, args []string) error {
 	})
 }
 
+//nolint:wrapcheck
 func get(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -199,6 +202,8 @@ func listDbs(*cobra.Command, []string) error {
 }
 
 // getDbs: returns a formatted list of available Skate DBs.
+//
+//nolint:wrapcheck
 func getDbs() ([]string, error) {
 	filepath, err := getFilePath()
 	if err != nil {
@@ -226,6 +231,8 @@ func formatDbs(dbs []string) []string {
 }
 
 // getFilePath: get the file path to the skate databases.
+//
+//nolint:wrapcheck
 func getFilePath(args ...string) (string, error) {
 	scope := gap.NewScope(gap.User, "charm")
 	dd, pathErr := scope.DataPath("")
@@ -233,13 +240,15 @@ func getFilePath(args ...string) (string, error) {
 		return "", pathErr
 	}
 	dir := filepath.Join(dd, "kv")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return "", err
 	}
 	return filepath.Join(append([]string{dir}, args...)...), nil
 }
 
 // deleteDb: delete a Skate database.
+//
+//nolint:wrapcheck
 func deleteDb(_ *cobra.Command, args []string) error {
 	path, err := findDb(args[0])
 	var errNotFound errDBNotFound
@@ -308,6 +317,7 @@ func findDb(name string) (string, error) {
 	return path, nil
 }
 
+//nolint:wrapcheck
 func list(_ *cobra.Command, args []string) error {
 	var k string
 	var pf string
@@ -343,7 +353,7 @@ func list(_ *cobra.Command, args []string) error {
 			opts.PrefetchValues = false
 		}
 		it := txn.NewIterator(opts)
-		defer it.Close() //nolint:errcheck
+		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
@@ -380,8 +390,8 @@ func nameFromArgs(args []string) (string, error) {
 
 func printFromKV(pf string, vs ...[]byte) {
 	nb := "(omitted binary data)"
-	fvs := make([]interface{}, 0)
-	isatty := term.IsTerminal(int(os.Stdin.Fd())) //nolint: gosec
+	fvs := make([]any, 0)
+	isatty := term.IsTerminal(int(os.Stdin.Fd()))
 	for _, v := range vs {
 		if isatty && !showBinary && !utf8.Valid(v) {
 			fvs = append(fvs, nb)
@@ -418,7 +428,7 @@ func openKV(name string) (*badger.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR))
+	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR)) //nolint:wrapcheck
 }
 
 func init() {
