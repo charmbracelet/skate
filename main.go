@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -13,22 +14,15 @@ import (
 	"unicode/utf8"
 
 	"github.com/agnivade/levenshtein"
+	"github.com/charmbracelet/fang"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v4"
 	gap "github.com/muesli/go-app-paths"
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
 
 var (
-	// Version set by goreleaser.
-	Version = ""
-
-	// CommitSHA set by goreleaser.
-	CommitSHA = ""
-
 	reverseIterate   bool
 	keysIterate      bool
 	valuesIterate    bool
@@ -94,23 +88,6 @@ var (
 		Aliases: []string{"del-db", "rm-db"},
 		Args:    cobra.MinimumNArgs(1),
 		RunE:    deleteDb,
-	}
-
-	manCmd = &cobra.Command{
-		Use:    "man",
-		Short:  "Generate man pages",
-		Args:   cobra.NoArgs,
-		Hidden: true,
-		RunE: func(*cobra.Command, []string) error {
-			manPage, err := mcobra.NewManPage(1, rootCmd) //.
-			if err != nil {
-				return err
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2021-2024 Charmbracelet, Inc.\n"+
-				"Released under MIT license.")
-			fmt.Println(manPage.Build(roff.NewDocument()))
-			return nil
-		},
 	}
 )
 
@@ -432,16 +409,6 @@ func openKV(name string) (*badger.DB, error) {
 }
 
 func init() {
-	if len(CommitSHA) >= 7 {
-		vt := rootCmd.VersionTemplate()
-		rootCmd.SetVersionTemplate(vt[:len(vt)-1] + " (" + CommitSHA[0:7] + ")\n")
-	}
-	if Version == "" {
-		Version = "unknown (built from source)"
-	}
-	rootCmd.Version = Version
-	rootCmd.CompletionOptions.HiddenDefaultCmd = true
-
 	listCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "list in reverse lexicographic order")
 	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
 	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
@@ -456,12 +423,11 @@ func init() {
 		listCmd,
 		listDbsCmd,
 		deleteDbCmd,
-		manCmd,
 	)
 }
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := fang.Execute(context.Background(), rootCmd); err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
