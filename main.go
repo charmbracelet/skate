@@ -1,6 +1,8 @@
+// Package main provides the skate CLI.
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -12,22 +14,15 @@ import (
 	"unicode/utf8"
 
 	"github.com/agnivade/levenshtein"
+	"github.com/charmbracelet/fang"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v4"
 	gap "github.com/muesli/go-app-paths"
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
 
 var (
-	// Version set by goreleaser.
-	Version = ""
-
-	// CommitSHA set by goreleaser.
-	CommitSHA = ""
-
 	reverseIterate   bool
 	keysIterate      bool
 	valuesIterate    bool
@@ -63,49 +58,36 @@ var (
 	}
 
 	deleteCmd = &cobra.Command{
-		Use:   "delete KEY[@DB]",
-		Short: "Delete a key with an optional @ db.",
-		Args:  cobra.ExactArgs(1),
-		RunE:  del,
+		Use:     "delete KEY[@DB]",
+		Short:   "Delete a key with an optional @ db.",
+		Aliases: []string{"del", "rm"},
+		Args:    cobra.ExactArgs(1),
+		RunE:    del,
 	}
 
 	listCmd = &cobra.Command{
-		Use:   "list [@DB]",
-		Short: "List key value pairs with an optional @ db.",
-		Args:  cobra.MaximumNArgs(1),
-		RunE:  list,
+		Use:     "list [@DB]",
+		Short:   "List key value pairs with an optional @ db.",
+		Aliases: []string{"ls"},
+		Args:    cobra.MaximumNArgs(1),
+		RunE:    list,
 	}
 
 	listDbsCmd = &cobra.Command{
-		Use:   "list-dbs",
-		Short: "List databases.",
-		Args:  cobra.NoArgs,
-		RunE:  listDbs,
+		Use:     "list-dbs",
+		Short:   "List databases.",
+		Aliases: []string{"ls-db"},
+		Args:    cobra.NoArgs,
+		RunE:    listDbs,
 	}
 
 	deleteDbCmd = &cobra.Command{
-		Use:    "delete-db [@DB]",
-		Hidden: false,
-		Short:  "Delete a database",
-		Args:   cobra.MinimumNArgs(1),
-		RunE:   deleteDb,
-	}
-
-	manCmd = &cobra.Command{
-		Use:    "man",
-		Short:  "Generate man pages",
-		Args:   cobra.NoArgs,
-		Hidden: true,
-		RunE: func(*cobra.Command, []string) error {
-			manPage, err := mcobra.NewManPage(1, rootCmd) //.
-			if err != nil {
-				return err
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2021-2024 Charmbracelet, Inc.\n"+
-				"Released under MIT license.")
-			fmt.Println(manPage.Build(roff.NewDocument()))
-			return nil
-		},
+		Use:     "delete-db [@DB]",
+		Hidden:  false,
+		Short:   "Delete a database",
+		Aliases: []string{"del-db", "rm-db"},
+		Args:    cobra.MinimumNArgs(1),
+		RunE:    deleteDb,
 	}
 )
 
@@ -120,6 +102,7 @@ func (err errDBNotFound) Error() string {
 	return fmt.Sprintf("did you mean %q", strings.Join(err.suggestions, ", "))
 }
 
+//nolint:wrapcheck
 func set(cmd *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -144,6 +127,7 @@ func set(cmd *cobra.Command, args []string) error {
 	})
 }
 
+//nolint:wrapcheck
 func get(_ *cobra.Command, args []string) error {
 	k, n, err := keyParser(args[0])
 	if err != nil {
@@ -195,6 +179,8 @@ func listDbs(*cobra.Command, []string) error {
 }
 
 // getDbs: returns a formatted list of available Skate DBs.
+//
+//nolint:wrapcheck
 func getDbs() ([]string, error) {
 	filepath, err := getFilePath()
 	if err != nil {
@@ -222,6 +208,8 @@ func formatDbs(dbs []string) []string {
 }
 
 // getFilePath: get the file path to the skate databases.
+//
+//nolint:wrapcheck
 func getFilePath(args ...string) (string, error) {
 	scope := gap.NewScope(gap.User, "charm")
 	dd, pathErr := scope.DataPath("")
@@ -229,13 +217,15 @@ func getFilePath(args ...string) (string, error) {
 		return "", pathErr
 	}
 	dir := filepath.Join(dd, "kv")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return "", err
 	}
 	return filepath.Join(append([]string{dir}, args...)...), nil
 }
 
 // deleteDb: delete a Skate database.
+//
+//nolint:wrapcheck
 func deleteDb(_ *cobra.Command, args []string) error {
 	path, err := findDb(args[0])
 	var errNotFound errDBNotFound
@@ -304,6 +294,7 @@ func findDb(name string) (string, error) {
 	return path, nil
 }
 
+//nolint:wrapcheck
 func list(_ *cobra.Command, args []string) error {
 	var k string
 	var pf string
@@ -339,7 +330,7 @@ func list(_ *cobra.Command, args []string) error {
 			opts.PrefetchValues = false
 		}
 		it := txn.NewIterator(opts)
-		defer it.Close() //nolint:errcheck
+		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
@@ -376,8 +367,8 @@ func nameFromArgs(args []string) (string, error) {
 
 func printFromKV(pf string, vs ...[]byte) {
 	nb := "(omitted binary data)"
-	fvs := make([]interface{}, 0)
-	isatty := term.IsTerminal(int(os.Stdin.Fd())) //nolint: gosec
+	fvs := make([]any, 0)
+	isatty := term.IsTerminal(int(os.Stdin.Fd()))
 	for _, v := range vs {
 		if isatty && !showBinary && !utf8.Valid(v) {
 			fvs = append(fvs, nb)
@@ -414,7 +405,7 @@ func openKV(name string) (*badger.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR))
+	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR)) //nolint:wrapcheck
 }
 
 func completeDB(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -487,16 +478,6 @@ func splitKeyAndDB(s string) (keyPref, dbPref string) {
 }
 
 func init() {
-	if len(CommitSHA) >= 7 {
-		vt := rootCmd.VersionTemplate()
-		rootCmd.SetVersionTemplate(vt[:len(vt)-1] + " (" + CommitSHA[0:7] + ")\n")
-	}
-	if Version == "" {
-		Version = "unknown (built from source)"
-	}
-	rootCmd.Version = Version
-	rootCmd.CompletionOptions.HiddenDefaultCmd = true
-
 	listCmd.Flags().BoolVarP(&reverseIterate, "reverse", "r", false, "list in reverse lexicographic order")
 	listCmd.Flags().BoolVarP(&keysIterate, "keys-only", "k", false, "only print keys and don't fetch values from the db")
 	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
@@ -511,7 +492,6 @@ func init() {
 		listCmd,
 		listDbsCmd,
 		deleteDbCmd,
-		manCmd,
 	)
 
 	// Autocomplete with databases and keys
@@ -522,7 +502,7 @@ func init() {
 }
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := fang.Execute(context.Background(), rootCmd); err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}

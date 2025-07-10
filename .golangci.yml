@@ -4,36 +4,37 @@ run:
 linters:
   enable:
     - bodyclose
-    - dupl
+    - exhaustive
     - goconst
     - godot
+    - gomoddirectives
     - goprintffuncname
     - gosec
     - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
     - prealloc
     - revive
     - rowserrcheck
     - sqlclosecheck
+    - tparallel
     - unconvert
     - unparam
     - whitespace
+    - wrapcheck
   exclusions:
     generated: lax
     presets:
       - common-false-positives
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
 formatters:
   enable:
+    - gofumpt
     - goimports
   exclusions:
     generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
