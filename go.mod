@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/agnivade/levenshtein v1.2.1
-	github.com/charmbracelet/fang v0.4.2
+	github.com/charmbracelet/fang v0.4.3
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dgraph-io/badger/v4 v4.8.0
 	github.com/muesli/go-app-paths v0.2.2
