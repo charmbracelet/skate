@@ -9,7 +9,7 @@ require (
 	github.com/dgraph-io/badger/v4 v4.8.0
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cobra v1.10.1
-	golang.org/x/term v0.35.0
+	golang.org/x/term v0.36.0
 )
 
 require (
@@ -50,7 +50,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
