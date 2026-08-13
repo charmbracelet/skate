@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/agnivade/levenshtein"
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/fang"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dgraph-io/badger/v4"
@@ -28,6 +29,7 @@ var (
 	valuesIterate    bool
 	showBinary       bool
 	delimiterIterate string
+	copyToClipboard  bool
 
 	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Bold(true)
 
@@ -150,6 +152,9 @@ func get(_ *cobra.Command, args []string) error {
 		return err
 	}
 	printFromKV("%s", v)
+	if copyToClipboard {
+		return clipboard.WriteAll(string(v))
+	}
 	return nil
 }
 
@@ -415,6 +420,7 @@ func init() {
 	listCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
 	listCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 	getCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
+	getCmd.Flags().BoolVarP(&copyToClipboard, "copy", "c", false, "copy value to clipboard")
 
 	rootCmd.AddCommand(
 		getCmd,
