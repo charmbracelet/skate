@@ -27,6 +27,7 @@ var (
 	keysIterate      bool
 	valuesIterate    bool
 	showBinary       bool
+	noTruncate       bool
 	delimiterIterate string
 
 	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Bold(true)
@@ -339,10 +340,14 @@ func list(_ *cobra.Command, args []string) error {
 				continue
 			}
 			err := item.Value(func(v []byte) error {
+				preview := v
+				if !noTruncate {
+					preview = previewValue(v)
+				}
 				if valuesIterate {
-					printFromKV(pf, v)
+					printFromKV(pf, preview)
 				} else {
-					printFromKV(pf, k, v)
+					printFromKV(pf, k, preview)
 				}
 				return nil
 			})
@@ -352,6 +357,35 @@ func list(_ *cobra.Command, args []string) error {
 		}
 		return nil
 	})
+}
+
+// previewLen is the maximum length of a value preview shown by skate list.
+const previewLen = 80
+
+// previewValue returns a single-line preview of v suitable for skate list
+// output. Newlines are escaped to "\n" and values longer than previewLen are
+// truncated with a "(N more chars)" suffix so the listing stays scannable when
+// values are large or multiline. Non-UTF-8 values are returned unchanged so
+// the existing binary handling in printFromKV still applies.
+func previewValue(v []byte) []byte {
+	if !utf8.Valid(v) {
+		return v
+	}
+	s := string(v)
+	hasNewline := strings.ContainsAny(s, "\n\r")
+	if !hasNewline && len(s) <= previewLen {
+		return v
+	}
+	full := len(s)
+	if len(s) > previewLen {
+		s = s[:previewLen]
+	}
+	r := strings.NewReplacer("\n", `\n`, "\r", `\r`)
+	s = r.Replace(s)
+	if full > previewLen {
+		s = fmt.Sprintf("%s  (%d more chars)", s, full-previewLen)
+	}
+	return []byte(s)
 }
 
 func nameFromArgs(args []string) (string, error) {
@@ -414,6 +448,7 @@ func init() {
 	listCmd.Flags().BoolVarP(&valuesIterate, "values-only", "v", false, "only print values")
 	listCmd.Flags().StringVarP(&delimiterIterate, "delimiter", "d", "\t", "delimiter to separate keys and values")
 	listCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
+	listCmd.Flags().BoolVar(&noTruncate, "no-truncate", false, "print full values instead of single-line previews")
 	getCmd.Flags().BoolVarP(&showBinary, "show-binary", "b", false, "print binary values")
 
 	rootCmd.AddCommand(
