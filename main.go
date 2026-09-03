@@ -413,6 +413,13 @@ func openKV(name string) (*badger.DB, error) {
 		// real disk space on every DB open. Badger rolls over to new vlog files
 		// as needed, so a small file size does not limit the total data.
 		opts = opts.WithValueLogFileSize(2 << 20)
+		// Same story for the memtable WAL: each open creates a new .mem file
+		// preallocated at 2x MemTableSize (128MB with the 64MB default),
+		// regardless of how much data is actually written. Badger requires
+		// ValueThreshold <= 15% of MemTableSize, so it must be lowered too:
+		// values above it are written to the value log, which badger handles
+		// transparently.
+		opts = opts.WithMemTableSize(2 << 20).WithValueThreshold(64 << 10)
 	}
 	return badger.Open(opts) //nolint:wrapcheck
 }
