@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -405,7 +406,15 @@ func openKV(name string) (*badger.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR)) //nolint:wrapcheck
+	opts := badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR)
+	if runtime.GOOS == "windows" {
+		// Badger preallocates each new .vlog file at 2x ValueLogFileSize and
+		// NTFS has no sparse files, so the ~1GB default would allocate ~2GB of
+		// real disk space on every DB open. Badger rolls over to new vlog files
+		// as needed, so a small file size does not limit the total data.
+		opts = opts.WithValueLogFileSize(2 << 20)
+	}
+	return badger.Open(opts) //nolint:wrapcheck
 }
 
 func init() {
