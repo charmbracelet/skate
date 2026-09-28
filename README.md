@@ -130,6 +130,24 @@ skate list @work-stuff
 skate list-dbs
 ```
 
+### Store Location
+
+By default, Skate stores its databases in your operating system's user data
+directory. You can choose a different parent directory with `--store`:
+
+```bash
+skate --store ~/.local/share/my-skate-store set kitty meow
+skate --store ~/.local/share/my-skate-store get kitty
+```
+
+You can also set `SKATE_STORE` if you want every command in a shell session to
+use the same store:
+
+```bash
+export SKATE_STORE=~/.local/share/my-skate-store
+skate list-dbs
+```
+
 ## Examples
 
 Here are some of our favorite ways to use `skate`.
