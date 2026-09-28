@@ -1,6 +1,6 @@
 module github.com/charmbracelet/skate
 
-go 1.24.2
+go 1.26.7
 
 require (
 	github.com/agnivade/levenshtein v1.2.1
