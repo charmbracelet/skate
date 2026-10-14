@@ -331,6 +331,7 @@ func list(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close() //nolint:errcheck
 	err = db.Sync()
 	if err != nil {
 		return err
@@ -418,7 +419,11 @@ func openKV(name string) (*badger.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return badger.Open(badger.DefaultOptions(path).WithLoggingLevel(badger.ERROR)) //nolint:wrapcheck
+	opts := badger.DefaultOptions(path).
+		WithLoggingLevel(badger.ERROR).
+		WithValueLogFileSize(64 << 20).
+		WithCompactL0OnClose(true)
+	return badger.Open(opts) //nolint:wrapcheck
 }
 
 func init() {
